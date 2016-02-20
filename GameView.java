@@ -3,11 +3,20 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.geom.*;
+import java.util.Arrays;
 
-public class View {
+public class GameView {
 
 	public static JFrame frame;
 	public static JFrame frame2;
+
+	public static double[][] redLoc = new double[6][2];
+	public static double[][] blueLoc = new double[6][2];
+
+	public static double[][] board = new double[16][2];
+
+	public static int radius = 10;
+	public static int pieceRadius = radius * 4;
 
 	public static void main(String[] args) {
 		frame = new JFrame("Main Menu - 6 Men's Morris");
@@ -50,112 +59,169 @@ public class View {
 		GridBagConstraints c = new GridBagConstraints();
 
 		DrawLines draw = new DrawLines();
-		frame2.add(draw);
+		frame2.getContentPane().add(draw);
+		Dimension d = new Dimension();
+		d.width = 982;
+		d.height = 953;
+		// Set board Coordinates as is
+		board[0][0] = d.width / 6 - radius;
+		board[0][1] = d.height / 6 - radius;
+		board[1][0] = d.width * 5 / 6 - radius;
+		board[1][1] = d.height / 6 - radius;
+		board[2][0] = d.width / 6 - radius;
+		board[2][1] = d.height * 5 / 6 - radius;
+		board[3][0] = d.width * 5 / 6 - radius;
+		board[3][1] = d.height * 5 / 6 - radius;
+		board[4][0] = d.width * 2 / 6 - radius;
+		board[4][1] = d.height * 2 / 6 - radius;
+		board[5][0] = d.width * 4 / 6 - radius;
+		board[5][1] = d.height * 2 / 6 - radius;
+		board[6][0] = d.width * 2 / 6 - radius;
+		board[6][1] = d.height * 4 / 6 - radius;
+		board[7][0] = d.width * 4 / 6 - radius;
+		board[7][1] = d.height * 4 / 6 - radius;
+		board[8][0] = d.width * 3 / 6 - radius;
+		board[8][1] = d.height / 6 - radius;
+		board[9][0] = d.width / 6 - radius;
+		board[9][1] = d.height * 3 / 6 - radius;
+		board[10][0] = d.width * 3 / 6 - radius;
+		board[10][1] = d.height * 5 / 6 - radius;
+		board[11][0] = d.width * 5 / 6 - radius;
+		board[11][1] = d.height * 3 / 6 - radius;
+		board[12][0] = d.width * 3 / 6 - radius;
+		board[12][1] = d.height * 2 / 6 - radius;
+		board[13][0] = d.width * 2 / 6 - radius;
+		board[13][1] = d.height * 3 / 6 - radius;
+		board[14][0] = d.width * 3 / 6 - radius;
+		board[14][1] = d.height * 4 / 6 - radius;
+		board[15][0] = d.width * 4 / 6 - radius;
+		board[15][1] = d.height * 3 / 6 - radius;
 
-//		JLabel label1 = new JLabel("Set Game Pieces");
-//		c.gridx = 0;
-//		c.gridy = 0;
-//		c.insets = new Insets(10, 10, 10, 10);
-//		panel.add(label1, c);
-//
-//		JLabel chooseSpot = new JLabel("Select Coloured Piece");
-//		c.gridx = 1;
-//		c.gridy = 3;
-//		panel.add(chooseSpot, c);
+		for (int i = 0; i < draw.redPiece.length; i++) {
+			redLoc[i][0] = d.width / 6 - pieceRadius + pieceRadius * i;
+			redLoc[i][1] = d.height / 6 - pieceRadius * 2;
+			blueLoc[i][0] = d.width * 3 / 6 + pieceRadius * i;
+			blueLoc[i][1] = d.height / 6 - pieceRadius * 2;
+		}
 
-		// // Red Pieces:
-		// JLabel[] redPiece = new JLabel[6];
-		// JLabel redSpot = new JLabel();
-		// c.gridx = 1;
-		// c.gridy = 7;
-		// panel.add(redSpot, c);
-		// for (int i = 0; i < redPiece.length; i++) {
-		// redPiece[i] = new JLabel();
-		// redPiece[i].setBounds(0, 0, 5, 5);
-		// c.gridx = i;
-		// c.gridy = 1;
-		// redPiece[i].setIcon(new ImageIcon("redPiece.png"));
-		// panel.add(redPiece[i], c);
-		// }
-		// redPiece[0].addMouseListener(new MouseAdapter() {
-		// @Override
-		// public void mouseClicked(MouseEvent e) {
-		// chooseSpot.setText("Click location to place piece");
-		// frame2.addMouseListener(new MouseAdapter(){
-		// @Override
-		// public void mouseClicked(MouseEvent e2){
-		// System.out.println("X: " + e2.getX() + " Y: " + e2.getY());
-		//// redPiece[0].setAlignmentX(e2.getX());
-		//// redPiece[0].setAlignmentY(e2.getY());
-		// }
-		// });
-		// }
-		// });
+		// DrawPieces drawP = new DrawPieces();
+		// frame2.add(drawP);
+
+		// JLabel label1 = new JLabel("Set Game Pieces");
+		// c.gridx = 0;
+		// c.gridy = 0;
+		// c.insets = new Insets(10, 10, 10, 10);
+		// panel.add(label1, c);
 		//
-		// // Blue Pieces:
-		// JLabel[] bluePiece = new JLabel[6];
-		// JLabel blueSpot = new JLabel();
-		// c.gridx = 7;
-		// c.gridy = 2;
-		// panel.add(blueSpot, c);
-		// for (int i = 0; i < bluePiece.length; i++) {
-		// bluePiece[i] = new JLabel();
-		// bluePiece[i].setBounds(0, 0, 5, 5);
-		// c.gridx = i;
-		// c.gridy = 2;
-		// bluePiece[i].setIcon(new ImageIcon("bluePiece.png"));
-		// panel.add(bluePiece[i], c);
-		// }
+		// JLabel chooseSpot = new JLabel("Select Coloured Piece");
+		// c.gridx = 1;
+		// c.gridy = 3;
+		// panel.add(chooseSpot, c);
 
 		// Check if valid button
-//		JButton checkValidButton = new JButton("Check Validity");
-//		c.gridx = 0;
-//		c.gridy = 3;
-//		c.insets = new Insets(10, 10, 10, 10);
-//		panel.add(checkValidButton, c);
-//		checkValidButton.addActionListener(new SetPiecesAction());
+		// JButton checkValidButton = new JButton("Check Validity");
+		// c.gridx = 0;
+		// c.gridy = 3;
+		// c.insets = new Insets(10, 10, 10, 10);
+		// panel.add(checkValidButton, c);
+		// checkValidButton.addActionListener(new SetPiecesAction());
 
-		frame2.addMouseListener(new MouseAdapter() {
+		frame2.getContentPane().addMouseListener(new MouseAdapter() {
+			public void mousePressed(MouseEvent e) {
+			}
+
+			public void mouseReleased(MouseEvent e) {
+			}
+
+			public void mouseEntered(MouseEvent e) {
+			}
+
+			public void mouseExited(MouseEvent e) {
+			}
+
 			public void mouseClicked(MouseEvent e) {
 				// clickedPiece(e);
 				// clickedPlacement(e);
-				System.out.println("MouseX = "+e.getX()+" MouseY = "+e.getY());
-				System.out.println(distanceFromPoint(e, draw.redPiece[0].getCenterX(), draw.redPiece[0].getCenterY()));
-				if(draw.redPiece[0].contains(e.getPoint())){
-				//if (distanceFromPoint(e, draw.redPiece[0].getCenterX(), draw.redPiece[0].getCenterY()) < draw.pieceRadius) {
-					System.out.println("X: "+ draw.redPiece[0].getCenterX() + " Y: " +draw.redPiece[0].getCenterY());
-					frame2.addMouseListener(new MouseAdapter() {
-						public void mouseClicked(MouseEvent e) {
-							if (draw.circle[0].contains(e.getPoint())){//(distanceFromPoint(e, draw.circle[0].getCenterX(), draw.circle[0].getCenterY()) < draw.radius) {
-								draw.redPiece[0].x = draw.circle[0].x;
-								draw.redPiece[0].y = draw.circle[0].y;
-								System.out.println("X: "+ draw.redPiece[0].getCenterX() + " Y: " +draw.redPiece[0].getCenterY());
+				// System.out.println("MouseX = "+e.getX()+" MouseY =
+				// "+e.getY());
+				// System.out.println(distanceFromPoint(e,
+				// draw.redPiece[0].getCenterX(),
+				// draw.redPiece[0].getCenterY()));
+				for (int i = 0; i < draw.redPiece.length; i++) {
+					if (draw.redPiece[i].contains(e.getPoint())) {
+						// if (distanceFromPoint(e,
+						// draw.redPiece[0].getCenterX(),
+						// draw.redPiece[0].getCenterY()) < pieceRadius) {
+						// System.out.println("X: "+
+						// draw.redPiece[0].getCenterX() + " Y: "
+						// +draw.redPiece[0].getCenterY());
+						int k = i;
+						frame2.getContentPane().addMouseListener(new MouseAdapter() {
+							public void mousePressed(MouseEvent e) {
 							}
 
-						}
-					});
-				}
+							public void mouseReleased(MouseEvent e) {
+							}
 
+							public void mouseEntered(MouseEvent e) {
+							}
+
+							public void mouseExited(MouseEvent e) {
+							}
+
+							public void mouseClicked(MouseEvent e) {
+								for (int j = 0; j < board.length; j++) {
+									if (draw.circle[j ].contains(e.getPoint())) {
+										redLoc[k][0] = board[j][0] - radius;
+										redLoc[k][1] = board[j][1] - radius;
+										draw.repaint();
+										System.out.println(Arrays.deepToString(redLoc));
+										// }
+										// System.out.println("X2: "+
+										// draw.redPiece[0].getCenterX() + " Y2:
+										// "
+										// +draw.redPiece[0].getCenterY());
+									}
+								}
+							}
+						});
+					}
+				}
 			}
 		});
 	}
 
 	public static class DrawLines extends JPanel {
 
-		int radius = 10;
 		Ellipse2D.Double[] circle = new Ellipse2D.Double[16];
-		
-		int pieceRadius = radius * 4;
+
 		Ellipse2D.Double[] redPiece = new Ellipse2D.Double[6];
 		Ellipse2D.Double[] bluePiece = new Ellipse2D.Double[6];
 
 		@Override
-		public void paintComponent(Graphics g) {
+		protected void paintComponent(Graphics g) {
 			Dimension d = this.getSize();
 			super.paintComponent(g);
 			Graphics2D g2d = (Graphics2D) g;
 			g2d.setColor(Color.BLACK);
 			g2d.setStroke(new BasicStroke(3));
+			// System.out.println("dX: "+d.width+" dY: "+d.height);
+
+			// Draw Lines for board
+			g2d.drawLine(d.width / 6, d.height / 6, d.width / 6, d.height * 5 / 6);
+			g2d.drawLine(d.width / 6, d.height / 6, d.width * 5 / 6, d.height / 6);
+			g2d.drawLine(d.width * 5 / 6, d.height / 6, d.width * 5 / 6, d.height * 5 / 6);
+			g2d.drawLine(d.width / 6, d.height * 5 / 6, d.width * 5 / 6, d.height * 5 / 6);
+
+			g2d.drawLine(d.width * 2 / 6, d.height * 2 / 6, d.width * 4 / 6, d.height * 2 / 6);
+			g2d.drawLine(d.width * 2 / 6, d.height * 2 / 6, d.width * 2 / 6, d.height * 4 / 6);
+			g2d.drawLine(d.width * 2 / 6, d.height * 4 / 6, d.width * 4 / 6, d.height * 4 / 6);
+			g2d.drawLine(d.width * 4 / 6, d.height * 2 / 6, d.width * 4 / 6, d.height * 4 / 6);
+
+			g2d.drawLine(d.width * 3 / 6, d.height / 6, d.width * 3 / 6, d.height * 2 / 6);
+			g2d.drawLine(d.width / 6, d.height * 3 / 6, d.width * 2 / 6, d.height * 3 / 6);
+			g2d.drawLine(d.width * 4 / 6, d.height * 3 / 6, d.width * 5 / 6, d.height * 3 / 6);
+			g2d.drawLine(d.width * 3 / 6, d.height * 4 / 6, d.width * 3 / 6, d.height * 5 / 6);
 
 			// Draw Circles:
 			circle[0] = new Ellipse2D.Double(d.width / 6 - radius, d.height / 6 - radius, radius * 2, radius * 2);
@@ -206,43 +272,24 @@ public class View {
 			// Red Pieces:
 			g2d.setColor(Color.RED);
 			for (int i = 0; i < redPiece.length; i++) {
-				redPiece[i] = new Ellipse2D.Double(d.width / 6 - pieceRadius + pieceRadius * i,
-						d.height / 6 - pieceRadius * 2, pieceRadius, pieceRadius);
+				redPiece[i] = new Ellipse2D.Double(redLoc[i][0], redLoc[i][1], pieceRadius, pieceRadius);
 				g2d.fill(redPiece[i]);
 			}
 
 			// Blue Pieces:
 			g2d.setColor(Color.BLUE);
 			for (int i = 0; i < bluePiece.length; i++) {
-				bluePiece[i] = new Ellipse2D.Double(d.width * 3 / 6 + pieceRadius * i,
-						d.height / 6 - pieceRadius * 2, pieceRadius, pieceRadius);
+				bluePiece[i] = new Ellipse2D.Double(blueLoc[i][0], blueLoc[i][1], pieceRadius, pieceRadius);
 				g2d.fill(bluePiece[i]);
 			}
 
-			g2d.setColor(Color.BLACK);
-
-			// Draw Lines for board
-			g2d.drawLine(d.width / 6, d.height / 6, d.width / 6, d.height * 5 / 6);
-			g2d.drawLine(d.width / 6, d.height / 6, d.width * 5 / 6, d.height / 6);
-			g2d.drawLine(d.width * 5 / 6, d.height / 6, d.width * 5 / 6, d.height * 5 / 6);
-			g2d.drawLine(d.width / 6, d.height * 5 / 6, d.width * 5 / 6, d.height * 5 / 6);
-
-			g2d.drawLine(d.width * 2 / 6, d.height * 2 / 6, d.width * 4 / 6, d.height * 2 / 6);
-			g2d.drawLine(d.width * 2 / 6, d.height * 2 / 6, d.width * 2 / 6, d.height * 4 / 6);
-			g2d.drawLine(d.width * 2 / 6, d.height * 4 / 6, d.width * 4 / 6, d.height * 4 / 6);
-			g2d.drawLine(d.width * 4 / 6, d.height * 2 / 6, d.width * 4 / 6, d.height * 4 / 6);
-
-			g2d.drawLine(d.width * 3 / 6, d.height / 6, d.width * 3 / 6, d.height * 2 / 6);
-			g2d.drawLine(d.width / 6, d.height * 3 / 6, d.width * 2 / 6, d.height * 3 / 6);
-			g2d.drawLine(d.width * 4 / 6, d.height * 3 / 6, d.width * 5 / 6, d.height * 3 / 6);
-			g2d.drawLine(d.width * 3 / 6, d.height * 4 / 6, d.width * 3 / 6, d.height * 5 / 6);
 		}
 	}
 
 	static class SetPiecesAction implements ActionListener {
 
 		public void actionPerformed(ActionEvent e) {
-			View.SetPieces();
+			GameView.SetPieces();
 			frame.setVisible(false);
 		}
 	}
@@ -262,6 +309,6 @@ public class View {
 	}
 
 	public static double distanceFromPoint(MouseEvent e, double x, double y) {
-		return Math.sqrt((e.getX() - x) * (e.getX() - x) + (e.getY() - y) * (e.getY() - y));
+		return Math.sqrt(((e.getX()) - x) * ((e.getX()) - x) + ((e.getY()) - y) * ((e.getY()) - y));
 	}
 }
