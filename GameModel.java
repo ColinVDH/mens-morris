@@ -6,4 +6,5 @@ public class GameModel extends Graph{
 	
 	public GameModel(){};
 	
+	
 }
