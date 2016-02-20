@@ -7,7 +7,6 @@ import java.awt.image.BufferedImage;
 import javax.swing.*;
 import javax.swing.border.*;
 
-
 import java.net.URL;
 import javax.imageio.ImageIO;
 import java.util.Observable;
@@ -25,6 +24,7 @@ public class GameView {
 
 	public static JFrame frame;
 	public static JFrame frame2;
+	public static GameBoard board = new GameBoard();
 
 	public GameView(GameModel model) {
 //		super("Six Men's Morris");
@@ -34,9 +34,13 @@ public class GameView {
 //		setVisible(true);
 
 		getNodeCoordinates(125, 125);  //**
-		
+		initMenu();
+	}
+
+	public void initMenu(){
 		frame = new JFrame("Main Menu - 6 Men's Morris");
 		frame.setVisible(true);
+		frame.setResizable(false);
 		frame.setSize(500, 200);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
@@ -63,15 +67,6 @@ public class GameView {
 		panel.add(setPieces, c);
 		setPieces.addActionListener(new SetPiecesAction());
 	}
-
-	public void paint(Graphics g) {
-//		super.paint(g);
-		
-		Graphics2D g2 = (Graphics2D) g;
-		g2.setStroke(new BasicStroke(10)); //**
-			
-			
-	}
 	
 	private void getNodeCoordinates(double NODE1_X, double NODE1_Y, int node){
 		System.out.println("running " + node);
@@ -94,7 +89,7 @@ public class GameView {
 	}
 	
 
-	public static class DrawLines extends JPanel {
+	public static class GameBoard extends JPanel {
 
 	
 		Ellipse2D.Double[] redpieces = new Ellipse2D.Double[6];
@@ -118,7 +113,7 @@ public class GameView {
 				for (int j = 0; j < neighbors.length; j++) {
 					int neighbor = neighbors[j];
 					Line2D line = new Line2D.Double(NodeCoordinates[node-1][0], NodeCoordinates[node-1][1] , NodeCoordinates[neighbor-1][0],NodeCoordinates[neighbor-1][1]);
-					g2d.draw(line);	
+					g2d.draw(line);
 				}
 				
 			}
@@ -139,6 +134,7 @@ public class GameView {
 				redpieces[i] = new Ellipse2D.Double(NodeCoordinates[1][0]+PIECERADIUS*(i-3),
 						NodeCoordinates[0][0]-100, PIECERADIUS, PIECERADIUS);
 				g2d.fill(redpieces[i]);
+
 			}
 
 			// Blue Pieces:
@@ -171,14 +167,15 @@ public class GameView {
 		frame2 = new JFrame("Set Pieces");
 		frame2.setVisible(true);
 		frame2.setSize(GAMEWIDTH, GAMEHEIGHT);
+		frame2.setResizable(false);
 		frame2.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-		JPanel panel = new JPanel(new GridBagLayout());
-		frame2.getContentPane().add(panel, BorderLayout.PAGE_START);
-		GridBagConstraints c = new GridBagConstraints();
+//		JPanel panel = new JPanel(new GridBagLayout());
+//		frame2.getContentPane().add(panel, BorderLayout.PAGE_START);
+//		GridBagConstraints c = new GridBagConstraints();
 
-		DrawLines draw = new DrawLines();
-		frame2.add(draw);
+		
+		frame2.add(board);
 	}
 		
 	static class SetPiecesAction implements ActionListener {
@@ -197,6 +194,7 @@ public class GameView {
 	}
 
 	public static void clickedPiece(MouseEvent e) {
+		
 	}
 
 	public static void clickedPlacement(MouseEvent e) {
@@ -206,4 +204,29 @@ public class GameView {
 	public static double distanceFromPoint(MouseEvent e, double x, double y) {
 		return Math.sqrt((e.getX() - x) * (e.getX() - x) + (e.getY() - y) * (e.getY() - y));
 	}
+	
+	public void registerListeners(GameController controller) {
+			board.addMouseListener(controller);
+//        pongPanel.addMouseMotionListener(controller1);
+//        pongPanel.addComponentListener(controller2);
+//        pongPanel.addKeyListener(controller3);
+//        this.addMouseListener(controller4);
+//
+//        Component[] components = pongMenu.getMenuComponents();
+//        for (Component component : components) {
+//            if (component instanceof AbstractButton) {
+//                AbstractButton button = (AbstractButton) component;
+//                button.addActionListener(controller3);
+//            }
+//        }
+//
+//        components = popupMenu.getComponents();
+//        for (Component component : components) {
+//            if (component instanceof AbstractButton) {
+//                AbstractButton button = (AbstractButton) component;
+//                button.addActionListener(controller3);
+//            }
+//        }
+    }
+
 }
