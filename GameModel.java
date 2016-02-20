@@ -1,5 +1,9 @@
-package com.aci;
+package com.aci.sixmensmorris;
 
-public class GameModel {
-
+public class GameModel extends Graph{
+	
+	
+	
+	public GameModel(){};
+	
 }
