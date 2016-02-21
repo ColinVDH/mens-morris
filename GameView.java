@@ -13,7 +13,7 @@ import java.util.Observable;
 import java.util.Observer;
 import java.util.*;
 
-public class GameView {
+public class GameView{
 
 	static GameModel model;
 	static final int GAMEWIDTH = 1000;
@@ -21,12 +21,19 @@ public class GameView {
 	static final double MULTIPLIER=0.7;
 	static final int PIECERADIUS=50;
 	static double[][] NodeCoordinates = new double[16][2];  //**
+	static Ellipse2D.Double[] boardnodes= new Ellipse2D.Double[16];
+
+
+
+	
 
 	public static JFrame frame;
 	public static JFrame frame2;
 	public static GameBoard board = new GameBoard();
+	public static Pieces pieces = new Pieces();
 
-	public GameView(GameModel model) {
+
+	public GameView(GameModel model){
 //		super("Six Men's Morris");
 		this.model = model;
 //		setSize(GAMEWIDTH, GAMEHEIGHT);
@@ -89,15 +96,13 @@ public class GameView {
 	}
 	
 
+
 	public static class GameBoard extends JPanel {
-
+		
 	
-		Ellipse2D.Double[] redpieces = new Ellipse2D.Double[6];
-		Ellipse2D.Double[] bluepieces = new Ellipse2D.Double[6];
-
 		@Override
 		public void paintComponent(Graphics g) {
-			Dimension d = this.getSize();
+//			Dimension d = this.getSize();
 			super.paintComponent(g);
 			Graphics2D g2d = (Graphics2D) g;
 			g2d.setColor(Color.BLACK);
@@ -118,35 +123,22 @@ public class GameView {
 				
 			}
 			
+			
+			
 			// Draw Circles:
 			for (int i=0; i<NodeCoordinates.length;i++){
 				int node = i+1;
 				g2d.setColor(Color.WHITE);
-				fillCenteredCircle(g2d, (int) NodeCoordinates[node-1][0], (int) NodeCoordinates[node-1][1], PIECERADIUS);
+				Ellipse2D.Double boardnode= new Ellipse2D.Double(NodeCoordinates[node-1][0]-PIECERADIUS/2, NodeCoordinates[node-1][1]-PIECERADIUS/2, (double) PIECERADIUS, (double) PIECERADIUS);
+				boardnodes[i]=boardnode;
+				g2d.fill(boardnode);
 				g2d.setColor(Color.BLACK);
-				drawCenteredCircle(g2d, (int) NodeCoordinates[node-1][0], (int) NodeCoordinates[node-1][1], PIECERADIUS);
+				g2d.setStroke(new BasicStroke(3));
+				g2d.draw(boardnode);
 			}
 
-			// Code for pieces:
-			// Red Pieces:
-			g2d.setColor(Color.RED);
-			for (int i = 0; i < redpieces.length; i++) {
-				redpieces[i] = new Ellipse2D.Double(NodeCoordinates[1][0]+PIECERADIUS*(i-3),
-						NodeCoordinates[0][0]-100, PIECERADIUS, PIECERADIUS);
-				g2d.fill(redpieces[i]);
-
-			}
-
-			// Blue Pieces:
-			g2d.setColor(Color.BLUE);
-			for (int i = 0; i < bluepieces.length; i++) {
-				bluepieces[i] = new Ellipse2D.Double(NodeCoordinates[1][0]+PIECERADIUS*(i-3),
-						NodeCoordinates[15][0]+(100-PIECERADIUS), PIECERADIUS, PIECERADIUS);
-				g2d.fill(bluepieces[i]);
-			}
-
-
-
+		
+			
 		}
 		
 		private void drawCenteredCircle(Graphics2D g, int x, int y, int r) {
@@ -154,6 +146,79 @@ public class GameView {
 			  y = y-(r/2);
 			  g.drawOval(x,y,r,r);
 			}
+	}
+		
+		
+	public static class Pieces extends JLayeredPane{
+			
+			
+		Pieces()
+	    {
+	        super() ;
+	        this.setOpaque( false ) ; // this will make the JPanel transparent 
+	                                  // but not its components (JLabel, TextField etc
+	    
+	    }
+			public void paintComponent(Graphics g) {
+				
+				super.paintComponent(g);
+				Graphics2D g2d = (Graphics2D) g;
+			
+			
+			
+			// Code for pieces:
+			// Red Pieces:
+				for (int i=0; i<model.getGraphSize(); i++){
+					for (Piece j: model.getTokenStack(i+1)){
+						g2d.setColor(j.getColor());
+						g2d.fill(j);
+						g2d.setStroke(new BasicStroke(3));
+						g2d.setColor(Color.BLACK);
+						g2d.draw(j);
+					}
+				}
+				
+			for (Piece i : model.redpieces) {
+				g2d.setColor(Color.RED);
+				g2d.fill(i);
+				g2d.setStroke(new BasicStroke(3));
+				g2d.setColor(Color.BLACK);
+				g2d.draw(i);
+				
+			}
+			
+			
+			for (Piece i : model.bluepieces) {
+				g2d.setColor(Color.BLUE);
+				g2d.fill(i);
+				g2d.setStroke(new BasicStroke(3));
+				g2d.setColor(Color.BLACK);
+				g2d.draw(i);
+			}
+			
+			if (model.getSelectedPiece()!=null){
+				g2d.setStroke(new BasicStroke(4));
+				g2d.setColor(Color.YELLOW);
+				g2d.draw(model.getSelectedPiece());
+			}
+				
+				
+			
+
+			
+
+			
+		}
+		}
+		
+		public Ellipse2D.Double[] getShapes(){
+			Ellipse2D.Double[] shapes = new Ellipse2D.Double[3];
+
+			return shapes;
+			
+		}
+
+
 		
 		private void fillCenteredCircle(Graphics2D g, int x, int y, int r) {
 			  x = x-(r/2);
@@ -161,21 +226,42 @@ public class GameView {
 			  g.fillOval(x,y,r,r);
 			}
 		
-	}
+	
 
 	public static void SetPieces() {
 		frame2 = new JFrame("Set Pieces");
 		frame2.setVisible(true);
-		frame2.setSize(GAMEWIDTH, GAMEHEIGHT);
+		frame2.setPreferredSize(new Dimension(GAMEWIDTH, GAMEHEIGHT));
+		frame.setLayout(new BorderLayout());
+		frame2.add(pieces, BorderLayout.CENTER);
+		frame2.add(board, BorderLayout.CENTER);
+		
 		frame2.setResizable(false);
 		frame2.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-
+//
 //		JPanel panel = new JPanel(new GridBagLayout());
 //		frame2.getContentPane().add(panel, BorderLayout.PAGE_START);
 //		GridBagConstraints c = new GridBagConstraints();
+		board.setBounds(0, 0, GAMEWIDTH, GAMEHEIGHT);
+		pieces.setBounds(0, 0, GAMEWIDTH, GAMEHEIGHT);
+		board.setBackground(Color.LIGHT_GRAY);
+		board.setOpaque(true);
+		frame2.pack();
+		
+		
+
 
 		
-		frame2.add(board);
+	
+		
+
+	
+
+		
+		
+
+		
+		
 	}
 		
 	static class SetPiecesAction implements ActionListener {
@@ -228,5 +314,11 @@ public class GameView {
 //            }
 //        }
     }
+
+	public void checkforValidityEvent() {
+		
+		
+	}
+	
 
 }

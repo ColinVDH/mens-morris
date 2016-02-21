@@ -2,9 +2,10 @@ package com.aci.sixmensmorris;
 
 import java.util.*;
 import java.awt.*;
+import java.awt.geom.Ellipse2D;
 
 public class Node {
-	private ArrayList<Color> tokenstack;
+	private ArrayList<Piece> tokenstack= new ArrayList<Piece>();
 	private int[] neighbors;
 	private double[] neighborlengths;
 	private int[] neighborangles;
@@ -39,11 +40,14 @@ public class Node {
 		return neighborangles[getIndexOf(n, neighbors)];
 	}
 
-	public void addToken(Color C) {
+	public void addToken(Piece C) {
 		tokenstack.add(C);
 	}
+	public void removeToken(Piece C) {
+		tokenstack.remove(C);
+	}
 	
-	public ArrayList<Color> getTokenStack(){
+	public ArrayList<Piece> getTokenStack(){
 		return tokenstack;
 	}
 	

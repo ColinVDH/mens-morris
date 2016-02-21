@@ -8,6 +8,7 @@ public class Main {
 		GameModel model= new GameModel();
 		GameView view= new GameView(model);
 		GameController control=new GameController(model, view);
+		view.registerListeners(control);
 		
 	}
 }

@@ -2,6 +2,7 @@ package com.aci.sixmensmorris;
 
 import java.util.*;
 import java.awt.*;
+import java.awt.geom.Ellipse2D;
 
 public class Graph {
 	// The setup of a particular Men's Morris board is inputted as an array of
@@ -49,11 +50,15 @@ public class Graph {
 		return nodes[n - 1].getNeighbors();
 	}
 
-	public void addToken(Color C, int n) {
+	public void addToken(Piece C, int n) {
 		nodes[n - 1].addToken(C);
 	}
+	
+	public void removeToken(Piece C, int n){
+		nodes[n-1].removeToken(C);
+	}
 
-	public ArrayList<Color> getTokenStack(int n) {
+	public ArrayList<Piece> getTokenStack(int n) {
 		return nodes[n - 1].getTokenStack();
 	}
 
