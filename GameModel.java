@@ -6,39 +6,73 @@ import java.util.*;
 public class GameModel extends Graph{
 	
 
-	Piece selectedpiece = null;
-	Integer selectedpiecenode=null;
-	Color selectedpiecepile=null;
-	ArrayList<Piece> redpieces = new ArrayList<Piece>();
-	ArrayList<Piece> bluepieces = new ArrayList<Piece>();
+	private Piece selectedpiece = null;
+	private Integer selectedpiecenode=null;
+	private Boolean selectedpieceunplayed=null;
+	private ArrayList<Piece> redpieces = new ArrayList<Piece>();
+	private ArrayList<Piece> bluepieces = new ArrayList<Piece>();
 
 	
 	
 	public GameModel(){
-		selectedpiece=null;
-		
 	};
 	
 	
-	public void setSelectedPiece(Piece s){
-		selectedpiece=s;
+	public void setSelectedPiece(Piece p){
+		selectedpiece=p;
+	}
+	
+	public void setSelectedPieceX(double x){
+		selectedpiece.x=x;
+	}
+	
+	public void setSelectedPieceY(double y){
+		selectedpiece.y=y;
 	}
 	
 	public Piece getSelectedPiece(){
 		return selectedpiece;
 	}
 	
-	
-	public ArrayList<Piece> getPieces(Color color){
-		if (color==Color.RED){
-			return redpieces;
-		}
-		else if (color==Color.BLUE){
-			return bluepieces;
-		}
-		return null;
+	public Integer getSelectedPieceNode(){
+		return selectedpiecenode;
 	}
-
+	
+	public void setSelectedPieceNode(Integer i){
+		selectedpiecenode=i;
+	}
+	
+	public boolean selectedPieceUnplayed(){
+		return selectedpieceunplayed;
+	}
+	
+	public void selectedPieceUnplayed(boolean b){
+		selectedpieceunplayed=b;
+	}
+	
+	public ArrayList<Piece> getRedPieces(){
+			return redpieces;
+	}
+	
+	public void removeRedPiece(int index){
+		redpieces.remove(index);
+	}
+	
+	public void addRedPiece(Piece p){
+		redpieces.add(p);
+	}
+			
+	public ArrayList<Piece> getBluePieces(){
+		return bluepieces;
+	}
+	
+	public void removeBluePiece(int index){
+		bluepieces.remove(index);
+	}
+	
+	public void addBluePiece(Piece p){
+		bluepieces.add(p);
+	}
 
 	public String getErrors() {
 		String errorstring="";

@@ -2,7 +2,6 @@ package com.aci.sixmensmorris;
 
 import java.awt.*;
 import java.awt.geom.*;
-import java.awt.event.*;
 import javax.swing.*;
 
 
@@ -10,28 +9,38 @@ import javax.swing.*;
 
 public class GameView{
 
-	static GameModel model;
-	static final int GAMEWIDTH = 1000;
-	static final int GAMEHEIGHT = 1000;
-	static final double MULTIPLIER=0.7;
-	static final int PIECERADIUS=50;
-	static double[][] NodeCoordinates = new double[16][2];  //**
-	static Ellipse2D.Double[] boardnodes= new Ellipse2D.Double[16];
+	
+	public static final int GAMEWIDTH = 1000;
+	public static final int GAMEHEIGHT = 1000;
+	public static final double MULTIPLIER=0.7;
+	public static final int PIECERADIUS=50;
+	public static Ellipse2D.Double[] boardnodes= new Ellipse2D.Double[16];
 
-	public static JFrame frame;
-	public static JFrame frame2;
-	public static JButton newGameButton = new JButton("New Game");
-	public static JButton setPieces = new JButton("Set Pieces");
-	public static GameBoard board = new GameBoard();
-	public static Pieces pieces = new Pieces();
-	public static JButton validitybutton = new JButton("Check Validity");
+	private static GameModel model;
+	private static double[][] NodeCoordinates = new double[16][2];  //**
+	private static JFrame frame;
+	private static JFrame frame2;
+	private static JButton newGameButton = new JButton("New Game");
+	private static JButton setPieces = new JButton("Set Pieces");
+	private static GameBoard board = new GameBoard();
+	private static Pieces pieces = new Pieces();
+	private static JButton validitybutton = new JButton("Check Validity");
 
 
 	public GameView(GameModel model){
 
 		this.model = model;
 		getNodeCoordinates(125, 125);  //**
-
+		
+		
+	    for (int i = 0; i < 6; i++) {
+					Piece redpiece=new Piece(Color.RED, NodeCoordinates[1][0]+PIECERADIUS*(i-3),
+							NodeCoordinates[0][0]-100, PIECERADIUS, PIECERADIUS);
+					Piece bluepiece=new Piece(Color.BLUE, NodeCoordinates[1][0]+PIECERADIUS*(i-3),
+							NodeCoordinates[15][0]+(100-PIECERADIUS), PIECERADIUS, PIECERADIUS);
+					model.addRedPiece(redpiece);
+					model.addBluePiece(bluepiece);
+		        }
 	}
 
 	public void initMenu(){
@@ -132,7 +141,9 @@ public class GameView{
 		
 		
 	
-	
+	public void repaintPieces(){
+		pieces.repaint();
+	}
 	
 	public static class Pieces extends JLayeredPane{
 			
@@ -163,7 +174,7 @@ public class GameView{
 					}
 				}
 				
-			for (Piece i : model.redpieces) {
+			for (Piece i : model.getRedPieces()) {
 				g2d.setColor(Color.RED);
 				g2d.fill(i);
 				g2d.setStroke(new BasicStroke(3));
@@ -173,7 +184,7 @@ public class GameView{
 			}
 			
 			
-			for (Piece i : model.bluepieces) {
+			for (Piece i : model.getBluePieces()) {
 				g2d.setColor(Color.BLUE);
 				g2d.fill(i);
 				g2d.setStroke(new BasicStroke(3));
@@ -211,10 +222,7 @@ public class GameView{
 
 		frame2.setResizable(false);
 		frame2.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-//
-//		JPanel panel = new JPanel(new GridBagLayout());
-//		frame2.getContentPane().add(panel, BorderLayout.PAGE_START);
-//		GridBagConstraints c = new GridBagConstraints();
+
 		board.setBounds(0, 0, GAMEWIDTH, GAMEHEIGHT);
 		pieces.setBounds(0, 0, GAMEWIDTH, GAMEHEIGHT);
 		board.setBackground(Color.LIGHT_GRAY);
@@ -222,9 +230,7 @@ public class GameView{
 		frame2.pack();	
 	}
 		
-	public static double distanceFromPoint(MouseEvent e, double x, double y) {
-		return Math.sqrt((e.getX() - x) * (e.getX() - x) + (e.getY() - y) * (e.getY() - y));
-	}
+
 	
 	public void registerListeners(GameController controller) {
 			board.addMouseListener(controller);

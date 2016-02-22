@@ -7,8 +7,8 @@ public class Piece extends Ellipse2D.Double {
 
 	Color color;
 	
-	public Piece(Color C, double w, double h, double x, double y){
-		super(w, h, x, y);
+	public Piece(Color C, double x, double y, double w, double h){
+		super(x, y, w, h);
 		color=C;
 	}
 	
