@@ -1,6 +1,5 @@
 package com.aci.sixmensmorris;
 
-import java.awt.Color;
 import java.util.*;
 
 public class GameModel extends Graph{

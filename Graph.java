@@ -1,8 +1,6 @@
 package com.aci.sixmensmorris;
 
 import java.util.*;
-import java.awt.*;
-import java.awt.geom.Ellipse2D;
 
 public class Graph {
 	// The setup of a particular Men's Morris board is inputted as an array of

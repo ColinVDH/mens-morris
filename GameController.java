@@ -10,7 +10,6 @@ import java.util.*;
 public class GameController implements MouseListener, ActionListener{
 	private static GameModel model;
 	private GameView view;
-	private static String gamestate;
 	
 	public GameController(GameModel m, GameView v) {
 		model=m;

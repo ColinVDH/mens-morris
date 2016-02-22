@@ -1,8 +1,6 @@
 package com.aci.sixmensmorris;
 
 import java.util.*;
-import java.awt.*;
-import java.awt.geom.Ellipse2D;
 
 public class Node {
 	private ArrayList<Piece> tokenstack= new ArrayList<Piece>();

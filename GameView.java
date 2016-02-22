@@ -4,6 +4,8 @@ import java.awt.*;
 import java.awt.geom.*;
 import javax.swing.*;
 
+import org.omg.CORBA.portable.InputStream;
+
 
 
 
@@ -12,8 +14,11 @@ public class GameView{
 	
 	public static final int GAMEWIDTH = 1000;
 	public static final int GAMEHEIGHT = 1000;
-	public static final double MULTIPLIER=0.7;
+	public static final double MULTIPLIER=0.6;
+	public static final int NODE1_X=195;
+	public static final int NODE1_Y=185;
 	public static final int PIECERADIUS=50;
+	
 	public static Ellipse2D.Double[] boardnodes= new Ellipse2D.Double[16];
 
 	private static GameModel model;
@@ -30,14 +35,14 @@ public class GameView{
 	public GameView(GameModel model){
 
 		this.model = model;
-		getNodeCoordinates(125, 125);  //**
+		getNodeCoordinates(NODE1_X, NODE1_Y);  //**
 		
 		
 	    for (int i = 0; i < 6; i++) {
 					Piece redpiece=new Piece(Color.RED, NodeCoordinates[1][0]+PIECERADIUS*(i-3),
-							NodeCoordinates[0][0]-100, PIECERADIUS, PIECERADIUS);
+							NodeCoordinates[0][1]-100, PIECERADIUS);
 					Piece bluepiece=new Piece(Color.BLUE, NodeCoordinates[1][0]+PIECERADIUS*(i-3),
-							NodeCoordinates[15][0]+(100-PIECERADIUS), PIECERADIUS, PIECERADIUS);
+							NodeCoordinates[15][1]+100-PIECERADIUS, PIECERADIUS);
 					model.addRedPiece(redpiece);
 					model.addBluePiece(bluepiece);
 		        }
@@ -59,14 +64,11 @@ public class GameView{
 		c.gridy = 8;
 		c.insets = new Insets(10, 10, 10, 10);
 		panel.add(label1, c);
-
 		
 		c.gridx = 0;
 		c.gridy = 9;
 		c.insets = new Insets(10, 10, 10, 10);
 		panel.add(newGameButton, c);
-		
-
 		
 		c.gridx = 0;
 		c.gridy = 10;
@@ -212,21 +214,23 @@ public class GameView{
 		frame2.setVisible(true);
 		frame2.setPreferredSize(new Dimension(GAMEWIDTH, GAMEHEIGHT));
 		frame2.setLayout(new BorderLayout());
-		
+		ImageIcon ii= new ImageIcon(getClass().getResource("background.jpg"));
+		JLabel background = new JLabel(ii);
+	   
 		pieces.setLayout(null);
 		board.setLayout(null);
 		validitybutton.setBounds(0,0,200,30);
 		board.add(validitybutton);
 		frame2.add(pieces);
 		frame2.add(board);
+		frame2.add(background);
 
 		frame2.setResizable(false);
 		frame2.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
 		board.setBounds(0, 0, GAMEWIDTH, GAMEHEIGHT);
 		pieces.setBounds(0, 0, GAMEWIDTH, GAMEHEIGHT);
-		board.setBackground(Color.LIGHT_GRAY);
-		board.setOpaque(true);
+		board.setOpaque(false);
 		frame2.pack();	
 	}
 		
