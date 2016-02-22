@@ -1,9 +1,6 @@
 package com.aci.sixmensmorris;
 
 import java.awt.Color;
-import java.awt.Shape;
-import java.awt.event.MouseEvent;
-import java.awt.geom.Ellipse2D;
 import java.util.*;
 
 public class GameModel extends Graph{
@@ -14,6 +11,7 @@ public class GameModel extends Graph{
 	Color selectedpiecepile=null;
 	ArrayList<Piece> redpieces = new ArrayList<Piece>();
 	ArrayList<Piece> bluepieces = new ArrayList<Piece>();
+
 	
 	
 	public GameModel(){
@@ -39,6 +37,27 @@ public class GameModel extends Graph{
 			return bluepieces;
 		}
 		return null;
+	}
+
+
+	public String getErrors() {
+		String errorstring="";
+		int errorcount=0;
+		for (int i=0; i<getGraphSize();i++){
+			if (getTokenStack(i+1).size()>1){
+				errorcount+=1;
+			}
+		}
+		if (errorcount==1) errorstring="There is 1 board location with multiple pieces. Only 1 piece per location is allowed.";
+		if (errorcount>1) errorstring="There are "+errorcount+" board locations with multiple pieces. Only 1 piece per location is allowed.";
+		return errorstring;
+		
+	}
+	
+	public String selectFirstPlayer(){
+		String[] players={"Red", "Blue"};
+		return players[new Random().nextInt(2)];
+		
 	}
 
 	

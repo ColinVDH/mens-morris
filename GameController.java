@@ -1,13 +1,13 @@
 package com.aci.sixmensmorris;
 
 import java.awt.Color;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-import java.awt.event.MouseMotionListener;
-import java.awt.geom.Ellipse2D;
 import java.util.*;
 
-public class GameController implements MouseListener{
+public class GameController implements MouseListener, ActionListener{
 	private static GameModel model;
 	private GameView view;
 	private static String gamestate;
@@ -25,11 +25,27 @@ public class GameController implements MouseListener{
 					model.redpieces.add(redpiece);
 					model.bluepieces.add(bluepiece);
 		        }
+	    
+	    view.initMenu();
 	}
 
-	public void mouseClicked(MouseEvent e) {
+	
+	@Override
+	public void actionPerformed(ActionEvent ae) {
+		String command= ae.getActionCommand();
+		if (command == "Check Validity"){
+			view.displayErrors(model.getErrors());
+		}
+		else if (command=="New Game"){
+			view.displayFirstPlayer(model.selectFirstPlayer());
+		}
+		else if (command=="Set Pieces"){
+			view.SetPieces();
+		}
 
-		view.checkforValidityEvent();
+	}
+	
+	public void mouseClicked(MouseEvent e) {
 		
 		if (model.getSelectedPiece()!=null){
 			boolean found=false;
@@ -133,9 +149,13 @@ public class GameController implements MouseListener{
 	@Override
 	public void mouseReleased(MouseEvent e) {
 	}
+
+
+
+}
 	
 	
 	
 	
 
-}
+
