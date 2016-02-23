@@ -4,7 +4,6 @@ import java.awt.*;
 import java.awt.geom.*;
 import javax.swing.*;
 
-import org.omg.CORBA.portable.InputStream;
 
 
 
@@ -14,7 +13,7 @@ public class GameView{
 	
 	public static final int GAMEWIDTH = 1000;
 	public static final int GAMEHEIGHT = 1000;
-	public static final double MULTIPLIER=0.6;
+	public static final double SIZE_MULTIPLIER=0.6;
 	public static final int NODE1_X=195;
 	public static final int NODE1_Y=185;
 	public static final int PIECERADIUS=50;
@@ -84,8 +83,8 @@ public class GameView{
 		for (int i=0; i<neighbors.length;i++){
 			int neighbor=neighbors[i];
 			if (NodeCoordinates[neighbor-1][0]==0.0){
-				int Y_CHANGE = (int)(MULTIPLIER*GAMEHEIGHT*model.getNeighborlength(node, neighbor)* Math.sin(Math.toRadians(model.getNeighborangle(node, neighbor))));
-				int X_CHANGE = (int) (MULTIPLIER*GAMEWIDTH*model.getNeighborlength(node, neighbor)* Math.cos(Math.toRadians(model.getNeighborangle(node, neighbor))));
+				int Y_CHANGE = (int)(SIZE_MULTIPLIER*GAMEHEIGHT*model.getNeighborlength(node, neighbor)* Math.sin(Math.toRadians(model.getNeighborangle(node, neighbor))));
+				int X_CHANGE = (int) (SIZE_MULTIPLIER*GAMEWIDTH*model.getNeighborlength(node, neighbor)* Math.cos(Math.toRadians(model.getNeighborangle(node, neighbor))));
 				NodeCoordinates[neighbor-1][0]=NODE1_X+X_CHANGE;
 				NodeCoordinates[neighbor-1][1]=NODE1_Y-Y_CHANGE;
 				getNodeCoordinates(NodeCoordinates[neighbor-1][0], NodeCoordinates[neighbor-1][1], neighbor);

@@ -52,8 +52,8 @@ public class Graph {
 		nodes[n - 1].addToken(C);
 	}
 	
-	public void removeToken(Piece C, int n){
-		nodes[n-1].removeToken(C);
+	public void removeToken(int n){
+		nodes[n-1].removeToken();
 	}
 
 	public ArrayList<Piece> getTokenStack(int n) {

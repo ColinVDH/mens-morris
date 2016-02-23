@@ -41,8 +41,8 @@ public class Node {
 	public void addToken(Piece C) {
 		tokenstack.add(C);
 	}
-	public void removeToken(Piece C) {
-		tokenstack.remove(C);
+	public void removeToken() {
+		tokenstack.remove(tokenstack.size()-1);
 	}
 	
 	public ArrayList<Piece> getTokenStack(){

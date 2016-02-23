@@ -33,16 +33,16 @@ public class GameController implements MouseListener, ActionListener{
 
 	}
 	
-	public void mousePressed(MouseEvent e) {
+	public void mousePressed(MouseEvent me) {
 		
 		if (model.getSelectedPiece()!=null){
 			boolean found=false;
 			for (int i=0; i<16;i++){
-				if (view.boardnodes[i].contains(e.getPoint())){
+				if (view.boardnodes[i].contains(me.getPoint())){
 					System.out.println("ll");
 					model.setSelectedPieceX(view.boardnodes[i].x);
 					model.setSelectedPieceY(view.boardnodes[i].y);
-					model.addToken(model.getSelectedPiece(), i+1);
+					
 					
 					//remove from red piece collection if it originated there
 					if (model.selectedPieceUnplayed() && model.getSelectedPiece().getColor()==Color.RED){
@@ -55,8 +55,10 @@ public class GameController implements MouseListener, ActionListener{
 					
 					//remove from another node if it originated there
 					else if (model.getSelectedPieceNode()!=null){
-						model.removeToken(model.getSelectedPiece(), model.getSelectedPieceNode());
+						model.removeToken(model.getSelectedPieceNode());
 					}
+					
+					model.addToken(model.getSelectedPiece(), i+1);
 
 					
 					found=true;
@@ -65,12 +67,12 @@ public class GameController implements MouseListener, ActionListener{
 		}
 			if (found==false){
 			
-				model.setSelectedPieceX(e.getX()-view.PIECERADIUS/2);
-				model.setSelectedPieceY(e.getY()-view.PIECERADIUS/2);
+				model.setSelectedPieceX(me.getX()-view.PIECERADIUS/2);
+				model.setSelectedPieceY(me.getY()-view.PIECERADIUS/2);
 				
 				//remove from another node if it originated there, also must re-add to the appropriate color pile
 				if (model.getSelectedPieceNode()!=null){
-					model.removeToken(model.getSelectedPiece(), model.getSelectedPieceNode());
+					model.removeToken(model.getSelectedPieceNode());
 					if (model.getSelectedPiece().getColor()==Color.RED){
 						model.addRedPiece(model.getSelectedPiece());
 					}
@@ -92,15 +94,14 @@ public class GameController implements MouseListener, ActionListener{
 		
 	else{
 		for (Piece redpiece: model.getRedPieces()){
-			if (redpiece.contains(e.getPoint())){
-				System.out.println("click");
+			if (redpiece.contains(me.getPoint())){
 				model.setSelectedPiece(redpiece);
 				model.selectedPieceUnplayed(true);
 			}
 		}
 		
 		for (Piece bluepiece: model.getBluePieces()){
-			if (bluepiece.contains(e.getPoint())){
+			if (bluepiece.contains(me.getPoint())){
 				model.setSelectedPiece(bluepiece);
 				model.selectedPieceUnplayed(true);
 			}
@@ -108,7 +109,7 @@ public class GameController implements MouseListener, ActionListener{
 		
 		for (int i=0;i<16;i++){
 				ArrayList<Piece> stack= model.getTokenStack(i+1);
-				if (!stack.isEmpty() && stack.get(stack.size() - 1).contains(e.getPoint())){
+				if (!stack.isEmpty() && view.boardnodes[i].contains(me.getPoint())){
 					model.setSelectedPiece(stack.get(stack.size() - 1));
 					model.setSelectedPieceNode(i+1);
 				}
@@ -117,7 +118,13 @@ public class GameController implements MouseListener, ActionListener{
 		}
 		
 	}
-		
+	System.out.println("NEW CLICK");
+	if (model.getSelectedPiece()!=null) System.out.println("selected piece:"+model.getSelectedPiece().getColor());
+	for (Piece p: model.getTokenStack(1)){
+		System.out.println("piece:"+p.getColor());
+	}
+	System.out.println("");
+	
 	view.repaintPieces();
 }
 
