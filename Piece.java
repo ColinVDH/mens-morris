@@ -1,3 +1,7 @@
+/*
+Piece allows representation and provides information about a particular game piece. 
+*/
+
 package com.aci.sixmensmorris;
 
 import java.awt.Color;
@@ -15,4 +19,6 @@ public class Piece extends Ellipse2D.Double {
 	public Color getColor(){
 		return color;
 	}
+
+	
 }

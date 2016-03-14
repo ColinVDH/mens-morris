@@ -1,3 +1,9 @@
+/*
+Node provide information about a particular point, 
+like the neighboring points, and the distance or angle to each neighboring point.  
+*/
+
+
 package com.aci.sixmensmorris;
 
 import java.util.*;
@@ -33,8 +39,6 @@ public class Node {
 	}
 	
 	public int getNeighborangle(int n){
-		System.out.println(n);
-		System.out.println(Arrays.toString(neighbors));
 		return neighborangles[getIndexOf(n, neighbors)];
 	}
 

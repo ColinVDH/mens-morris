@@ -1,3 +1,10 @@
+/*
+GameController registers as a listener to the view, 
+responds to user input (mouse clicks, button presses) 
+by modifying the data in the model if necessary, 
+and then calls the view to update the GUI. 
+*/
+
 package com.aci.sixmensmorris;
 
 import java.awt.Color;
@@ -7,128 +14,133 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.util.*;
 
-public class GameController implements MouseListener, ActionListener{
+public class GameController implements MouseListener, ActionListener {
 	private static GameModel model;
 	private GameView view;
-	
+
+	// constructor
 	public GameController(GameModel m, GameView v) {
-		model=m;
-		view=v;
-	    view.initMenu();
+		model = m;
+		view = v;
+		view.initMenu(); // initialize the view main menu
 	}
 
 	
 	@Override
+	/* (non-Javadoc)
+	 * Action if a particular JButton is pressed.
+	 */
 	public void actionPerformed(ActionEvent ae) {
-		String command= ae.getActionCommand();
-		if (command == "Check Validity"){
-			view.displayErrors(model.getErrors());
+		String command = ae.getActionCommand();
+		if (command == "Save Game") {
+			
 		}
-		else if (command=="New Game"){
-			view.displayFirstPlayer(model.selectFirstPlayer());
+		else if (command == "Continue from Save") {
+			
+		} 
+		else if (command == "New Game") {
+			view.initGameWindow(); // calls view to create Set Pieces window
 		}
-		else if (command=="Set Pieces"){
-			view.SetPieces();
+		else if (command=="Return to Main Menu"){
+			view.closeGame();
+			model.modelReset();
+			view.viewReset();
+			view.initMenu();
+			
 		}
 
 	}
+
 	
+	/* (non-Javadoc)
+	 * The procedure if a mouse has been clicked on the game screen
+	 */
 	public void mousePressed(MouseEvent me) {
-		
-		if (model.getSelectedPiece()!=null){
-			boolean found=false;
-			for (int i=0; i<16;i++){
-				if (view.boardnodes[i].contains(me.getPoint())){
-					System.out.println("ll");
-					model.setSelectedPieceX(view.boardnodes[i].x);
-					model.setSelectedPieceY(view.boardnodes[i].y);
-					
-					
-					//remove from red piece collection if it originated there
-					if (model.selectedPieceUnplayed() && model.getSelectedPiece().getColor()==Color.RED){
-						model.removeRedPiece(model.getRedPieces().indexOf(model.getSelectedPiece()));
-					}
-					//remove from blue pile if it originated there
-					if (model.selectedPieceUnplayed() && model.getSelectedPiece().getColor()==Color.BLUE){
-						model.removeBluePiece(model.getBluePieces().indexOf(model.getSelectedPiece()));
-					}
-					
-					//remove from another node if it originated there
-					else if (model.getSelectedPieceNode()!=null){
-						model.removeToken(model.getSelectedPieceNode());
-					}
-					
-					model.addToken(model.getSelectedPiece(), i+1);
 
-					
-					found=true;
+		boolean unselect=false; //unselect the current piece
+		boolean changestate=false; //change the state of the active player
+		boolean changeplayer=false; //change the active player
+		int clickednode=0; //the node clicked (default 0)
+		for (int i = 0; i < model.getGraphSize(); i++) {
+			if (view.boardnodes.get(i).contains(me.getPoint())) {
+				clickednode=i+1;
+			}
+		}
+
+	if (model.getSelectedPiece()!=null){ //if a piece is currently selected
+		if (model.getSelectedPiece().contains(me.getPoint())){  //if the same piece is clicked again
+			unselect=true; //unselect the current piece
+			
+		}
+		else if (clickednode!=0){ //if a board location has been clicked
+			if (model.getValidNodes().contains(clickednode)){  //If a valid location is clicked
+				if (model.getState().equals("place")){  //if the state is "place"
+					model.removePiece(model.getPieces().indexOf(model.getSelectedPiece())); //remove piece from the unplayed pieces array
+					model.setSelectedPieceX(view.boardnodes.get(clickednode-1).x); //change selected piece coordinates
+					model.setSelectedPieceY(view.boardnodes.get(clickednode-1).y);
+					model.addToken(model.getSelectedPiece(), clickednode); //add piece to the board location
+					changestate=true;  
+
+				
+				}		
+			
+				if (model.getState().equals("move") || model.getState().equals("fly")){
+					model.setSelectedPieceX(view.boardnodes.get(clickednode-1).x); //change selected piece coordinates
+					model.setSelectedPieceY(view.boardnodes.get(clickednode-1).y); 
+					model.addToken(model.getSelectedPiece(), clickednode); //add piece to the board location
+					model.removeToken(model.getSelectedPieceNode()); //remove piece from previous board location
+					changestate=true;
+
+				}
+			}
+			else view.notification("Illegal Move!"); //If an invalid board location has been clicked.
+			unselect=true; //unselect current piece either way (valid or invalid node clicked). 
+		}
+
+		if (unselect){
+			model.setSelectedPiece(null); //select piece is set to null.
+			model.setSelectedPieceNode(null); //select piece node is set to null.
+		}
+		
+	}
+	
+	else { //If there is currently no piece selected
+		if (model.getState().equals("remove")){ //If the active player must remove an enemy piece.
+			if (clickednode!=0 && !model.getTokenStack(clickednode).isEmpty() && model.getTokenStack(clickednode).get(0).getColor()!=model.getActivePlayer()){ //the clicked node is occupied by opponent.
+				if (model.getValidNodes().contains(clickednode)){ //the clicked node is valid to remove
+					model.removeToken(clickednode); //remove the opponent piece.
+					changestate=true;
+
+				}
+				else {
+					view.notification("Illegal Move!"); //Will only be invalid in the case that it is part of a mill.
+				}
+			}
+		}
+		
+		else if (clickednode==0){
+			for (Piece piece : model.getPieces()) {
+				if (piece.contains(me.getPoint()) && model.getActivePlayer() == piece.getColor()) { // clicked unplayed piece
+					model.setSelectedPiece(piece); //set selected piece
 					break;
+				}	
 			}
 		}
-			if (found==false){
-			
-				model.setSelectedPieceX(me.getX()-view.PIECERADIUS/2);
-				model.setSelectedPieceY(me.getY()-view.PIECERADIUS/2);
-				
-				//remove from another node if it originated there, also must re-add to the appropriate color pile
-				if (model.getSelectedPieceNode()!=null){
-					model.removeToken(model.getSelectedPieceNode());
-					if (model.getSelectedPiece().getColor()==Color.RED){
-						model.addRedPiece(model.getSelectedPiece());
-					}
-					else model.addBluePiece(model.getSelectedPiece());
-				}
-				
-			}
-			
-			
-			
-			//remove selected piece and related information
-			model.setSelectedPiece(null);
-			model.selectedPieceUnplayed(false);
-			model.setSelectedPieceNode(null);
-			
+		else if (!model.getTokenStack(clickednode).isEmpty() && model.getTokenStack(clickednode).get(0).getColor()==model.getActivePlayer()){ //selects one of his pieces on the board.
+			model.setSelectedPiece(model.getTokenStack(clickednode).get(0)); //set selected piece
+			model.setSelectedPieceNode(clickednode); //set selected piece node.
+		}
 	
-			
+		
 	}
-		
-	else{
-		for (Piece redpiece: model.getRedPieces()){
-			if (redpiece.contains(me.getPoint())){
-				model.setSelectedPiece(redpiece);
-				model.selectedPieceUnplayed(true);
-			}
-		}
-		
-		for (Piece bluepiece: model.getBluePieces()){
-			if (bluepiece.contains(me.getPoint())){
-				model.setSelectedPiece(bluepiece);
-				model.selectedPieceUnplayed(true);
-			}
-		}
-		
-		for (int i=0;i<16;i++){
-				ArrayList<Piece> stack= model.getTokenStack(i+1);
-				if (!stack.isEmpty() && view.boardnodes[i].contains(me.getPoint())){
-					model.setSelectedPiece(stack.get(stack.size() - 1));
-					model.setSelectedPieceNode(i+1);
-				}
-			
+	if (changestate) model.changeState(clickednode); //change state if necessary
+	if (changestate && model.getState()!="win" && model.getState()!="remove") model.changeActivePlayer(); //change active player if necessary
+	view.updateState(); //update how the state is presented in the view.
+	view.repaintPieces(); // repaint the pieces on the board.
 
-		}
-		
-	}
-	System.out.println("NEW CLICK");
-	if (model.getSelectedPiece()!=null) System.out.println("selected piece:"+model.getSelectedPiece().getColor());
-	for (Piece p: model.getTokenStack(1)){
-		System.out.println("piece:"+p.getColor());
-	}
-	System.out.println("");
-	
-	view.repaintPieces();
 }
 
-	
+
 
 	@Override
 	public void mouseEntered(MouseEvent e) {
@@ -137,7 +149,7 @@ public class GameController implements MouseListener, ActionListener{
 	@Override
 	public void mouseExited(MouseEvent e) {
 	}
-
+	
 	@Override
 	public void mouseClicked(MouseEvent e) {
 	}
@@ -146,12 +158,4 @@ public class GameController implements MouseListener, ActionListener{
 	public void mouseReleased(MouseEvent e) {
 	}
 
-
-
 }
-	
-	
-	
-	
-
-
