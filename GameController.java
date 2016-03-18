@@ -33,10 +33,10 @@ public class GameController implements MouseListener, ActionListener {
 	public void actionPerformed(ActionEvent ae) {
 		String command = ae.getActionCommand();
 		if (command == "Save Game") {
-			
+			model.writeToSave(Arrays.deepToString(model.boardPlacement));
 		}
 		else if (command == "Continue from Save") {
-			
+			model.readFromSave();    
 		} 
 		else if (command == "New Game") {
 			view.initGameWindow(); // calls view to create Set Pieces window
@@ -56,7 +56,6 @@ public class GameController implements MouseListener, ActionListener {
 	 * The procedure if a mouse has been clicked on the game screen
 	 */
 	public void mousePressed(MouseEvent me) {
-
 		boolean unselect=false; //unselect the current piece
 		boolean changestate=false; //change the state of the active player
 		boolean changeplayer=false; //change the active player
@@ -80,6 +79,8 @@ public class GameController implements MouseListener, ActionListener {
 					model.setSelectedPieceY(view.boardnodes.get(clickednode-1).y);
 					model.addToken(model.getSelectedPiece(), clickednode); //add piece to the board location
 					changestate=true;  
+					//SAVE STUFF
+					model.setPosition(model.getActivePlayer().toString(), clickednode);
 
 				
 				}		
@@ -90,6 +91,8 @@ public class GameController implements MouseListener, ActionListener {
 					model.addToken(model.getSelectedPiece(), clickednode); //add piece to the board location
 					model.removeToken(model.getSelectedPieceNode()); //remove piece from previous board location
 					changestate=true;
+					//SAVE STUFF
+					model.setPosition(model.getActivePlayer().toString(), clickednode);
 
 				}
 			}
@@ -110,6 +113,8 @@ public class GameController implements MouseListener, ActionListener {
 				if (model.getValidNodes().contains(clickednode)){ //the clicked node is valid to remove
 					model.removeToken(clickednode); //remove the opponent piece.
 					changestate=true;
+					//SAVE STUFF
+					model.setPosition("null", clickednode);
 
 				}
 				else {
