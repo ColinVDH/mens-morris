@@ -134,10 +134,10 @@ public class GameController implements MouseListener, ActionListener {
 		
 	}
 	if (changestate) model.changeState(clickednode); //change state if necessary
-	if (changestate && model.getState()!="win" && model.getState()!="remove") model.changeActivePlayer(); //change active player if necessary
+	if (changestate && model.getState()!="win" && model.getState()!="draw"  && model.getState()!="remove") model.changeActivePlayer(); //change active player if necessary
 	view.updateState(); //update how the state is presented in the view.
 	view.repaintPieces(); // repaint the pieces on the board.
-
+	if (changestate) model.updateHistory(); //add a snapshot of the current board. This is used to check for a "draw"
 }
 
 

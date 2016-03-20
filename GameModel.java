@@ -12,14 +12,7 @@ import java.awt.geom.Ellipse2D;
 import java.util.*;
 
 
-/**
- * @author Asus
- *
- */
-/**
- * @author Asus
- *
- */
+
 public class GameModel extends Graph {
 
 
@@ -31,6 +24,7 @@ public class GameModel extends Graph {
 	private String bluestate; //state of the red player  ("place", "move", "fly", "remove", "win")
 	private int redcount; //the number of pieces that the red player has on the board
 	private int bluecount; //the number of pieces that the blue player has on the board
+	private ArrayList<Color[]> history =new ArrayList<Color[]>();
 	
 
 	/**
@@ -60,6 +54,7 @@ public class GameModel extends Graph {
 			removeBoardPiece(i+1);
 		}
 		pieces= new ArrayList<Piece>();
+		history =new ArrayList<Color[]>();
 	}
 	
 
@@ -292,12 +287,43 @@ public class GameModel extends Graph {
 			}
 		}
 		if (opponentmovesAvailable()==false) newstate="win";
+		else if (repeatedPosition()) newstate="draw";
 		setState(newstate);
 	}
 
 
-
+	public void updateHistory(){
+		if (getState()!="place" && getState()!="remove"){
+			Color[] currentgraph=new Color[getGraphSize()];
+			for (int i=0;i<getGraphSize();i++){
+				if (nodes[i].getTokenStack().isEmpty()) currentgraph[i]=null;
+				else currentgraph[i]=nodes[i].getTokenStack().get(0).getColor();
+			}
+			history.add(currentgraph);
+			
+			System.out.println("ADDED");
+			
+		}
+	}
 	
+	public boolean repeatedPosition(){
+		if (getState()!="place" && getState()!="remove"){
+			for (int i=0;i<history.size();i++){
+				int counter=0;
+				Color[] oldgraph=history.get(i);
+				for (int j=0;j<getGraphSize(); j++){
+					if ((oldgraph[j]==null && nodes[j].getTokenStack().isEmpty())
+							|| (oldgraph[j]!=null && !nodes[j].getTokenStack().isEmpty() 
+							&& oldgraph[j]==nodes[j].getTokenStack().get(0).getColor())){
+						counter+=1;
+					}
+					System.out.println(counter);
+				}
+				if (counter==getGraphSize()) return true;
+			}
+		}
+		return false;
+	}
 	
 
 	/**

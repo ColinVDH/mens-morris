@@ -83,7 +83,7 @@ public class Graph {
 	private static int PIECENUMBER;
 	private static String NAME;
 	
-	private static Node[] nodes;
+	protected static Node[] nodes;
 
 	public Graph() {
 		this(SIXSETUP);

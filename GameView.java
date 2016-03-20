@@ -297,54 +297,47 @@ public class GameView {
 		if (model.getActivePlayer() == Color.RED) color = "Red";
 		else color = "Blue";
 		
+		if (model.getState()=="draw" || model.getState()=="win"){
+			JLabel label1;
+			if (model.getState()=="draw"){
+				label1 = new JLabel("It's a draw");
+			}
+			else label1 = new JLabel(color+" wins!");
+			state.setText("Game Over.");
+			
+			frame2.getRootPane().getGlassPane().setVisible(true);
+			frame3 = new JFrame("");
+			frame3.setResizable(false);
+			frame3.setSize(200, 150);
+			frame3.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+			
+
+			JPanel panel = new JPanel(new GridBagLayout());
+			frame3.getContentPane().add(panel, BorderLayout.NORTH);
+			GridBagConstraints c = new GridBagConstraints();
+
+			
+			label1.setFont(new Font("Calibri", Font.BOLD, 25));
+			c.gridx = 0;
+			c.gridy = 8;
+			c.insets = new Insets(10, 10, 10, 10);
+			panel.add(label1, c);
+
+			c.gridx = 0;
+			c.gridy = 9;
+			c.insets = new Insets(10, 10, 10, 10);
+			panel.add(mainmenu, c);
+			frame3.setLocationRelativeTo(frame2);
+			frame3.setVisible(true);
+		}
+		else if (model.getState()== "remove") state.setText(color + "'s turn." + " Remove opponent piece.");
+		else if (model.getState()=="place") state.setText(color + "'s turn." + " Place piece.");
+		else if (model.getState()=="move") state.setText(color + "'s turn." + " Move piece.");
+		else if (model.getState()== "fly") state.setText(color + "'s turn." + " Move piece. Flying is permitted.");
+		
+	}
 		
 	
-		switch (model.getState()) {
-			case "win":
-				state.setText("Game Over.");
-				
-				frame2.getRootPane().getGlassPane().setVisible(true);
-				frame3 = new JFrame("");
-				frame3.setResizable(false);
-				frame3.setSize(200, 150);
-				frame3.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-				
-	
-				JPanel panel = new JPanel(new GridBagLayout());
-				frame3.getContentPane().add(panel, BorderLayout.NORTH);
-				GridBagConstraints c = new GridBagConstraints();
-	
-				JLabel label1 = new JLabel(color+ " wins!");
-				label1.setFont(new Font("Calibri", Font.BOLD, 25));
-				c.gridx = 0;
-				c.gridy = 8;
-				c.insets = new Insets(10, 10, 10, 10);
-				panel.add(label1, c);
-	
-				c.gridx = 0;
-				c.gridy = 9;
-				c.insets = new Insets(10, 10, 10, 10);
-				panel.add(mainmenu, c);
-				frame3.setLocation(dim.width/2-frame3.getSize().width/2, dim.height/2-frame3.getSize().height/2);
-				frame3.setVisible(true);
-				break;
-			case "remove":
-				state.setText(color + "'s turn." + " Remove opponent piece.");
-				break;
-			case "place":
-				state.setText(color + "'s turn." + " Place piece.");
-				break;
-			case "move":
-				state.setText(color + "'s turn." + " Move piece.");
-				break;
-			case "fly":
-				state.setText(color + "'s turn." + " Move piece. Flying is permitted.");
-				break;
-			default: state.setText("ERROR");
-				break;
-
-		}
-	}
 	
 	
 	// Display notifications (Used to inform player of illegal moves)
