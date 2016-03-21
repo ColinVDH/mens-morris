@@ -14,7 +14,6 @@ import java.awt.geom.*;
 import java.awt.image.ImageObserver;
 import java.util.ArrayList;
 import java.util.Arrays;
-
 import javax.swing.*;
 
 public class GameView {
@@ -25,11 +24,10 @@ public class GameView {
 	public static final int NODE1_X = (int) ((double) GAMEWIDTH*0.195); // top left node coordinates
 	public static final int NODE1_Y = (int) ((double) GAMEHEIGHT*0.180);
 	public static final int PIECERADIUS = 45; // size of piece & board locations
-
 	public static ArrayList<Ellipse2D.Double> boardnodes = new ArrayList<Ellipse2D.Double>();
 
 	private static GameModel model;
-	private static ArrayList<double[]> NodeCoordinates = new ArrayList<double[]>();
+	public static ArrayList<double[]> NodeCoordinates = new ArrayList<double[]>();
 	private static JFrame frame; // mainmenu frame
 	private static JFrame frame2; // gameboard frame
 	private static JFrame frame3; //gameover frame
@@ -63,18 +61,17 @@ public class GameView {
 			model.addPiece(bluepiece);
 		}
 	}
-	
+
 	public void viewReset(){
-		for (int i = 0; i < model.getPieceNumber(); i++) {
+		for (int i = 0; i < model.getRedStack(); i++) {
 			Piece redpiece = new Piece(Color.RED, (double) GAMEWIDTH / 2 - PIECERADIUS / 2 -3,  60 , PIECERADIUS);
-			Piece bluepiece = new Piece(Color.BLUE, (double) GAMEWIDTH / 2 - PIECERADIUS / 2 -3 , GAMEHEIGHT-135, PIECERADIUS);
 			model.addPiece(redpiece);
+		}	
+		for (int i = 0; i < model.getBlueStack(); i++) {
+			Piece bluepiece = new Piece(Color.BLUE, (double) GAMEWIDTH / 2 - PIECERADIUS / 2 -3 , GAMEHEIGHT-135, PIECERADIUS);
 			model.addPiece(bluepiece);
 		}
 	}
-	
-	
-	
 	/**
 	 * Recursively generate all node coordinates.
 	 */
@@ -240,7 +237,6 @@ public class GameView {
 		frame2 = new JFrame(model.getName());
 		
 		frame2.setPreferredSize(new Dimension(GAMEWIDTH, GAMEHEIGHT));
-		//frame2.setLayout(new BorderLayout());
 		ImageIcon ii = new ImageIcon(getClass().getResource("background.jpg"));
 		JLabel background = new JLabel(ii);
 
@@ -252,21 +248,17 @@ public class GameView {
 		c.weightx = 1;
 		c.gridx = 0;
 		c.gridy = 0;
+		savebutton.setEnabled(true);
 		board.add(savebutton, c);
 
-		updateState();
+		
 		c.anchor = GridBagConstraints.NORTH;
-//		state.setOpaque(true);
-//		state.setBorder(BorderFactory.createLineBorder(Color.black));
 		board.add(state, c);
-
 		state.setFont(new Font("Calibri", Font.BOLD, 25));
-//		state.setHorizontalAlignment(JLabel.CENTER);
-//		state.setVerticalAlignment(JLabel.TOP);
 		frame2.add(pieces);
 		frame2.add(board);
 		frame2.add(background);
-		
+	
 		frame2.getRootPane().setGlassPane(new JComponent() {
 		    public void paintComponent(Graphics g) {
 		        g.setColor(new Color(0, 0, 0, 100));
@@ -284,6 +276,7 @@ public class GameView {
 		frame2.setResizable(false);
 		frame2.setLocation(dim.width/2-frame2.getSize().width/2, dim.height/2-frame2.getSize().height/2);
 		frame2.setVisible(true);
+		updateState();
 	}
 	
 	// Repaint the pieces.
@@ -297,15 +290,16 @@ public class GameView {
 		if (model.getActivePlayer() == Color.RED) color = "Red";
 		else color = "Blue";
 		
-		if (model.getState()=="draw" || model.getState()=="win"){
+		if (model.getState().equals("draw") || model.getState().equals("win")){
 			JLabel label1;
-			if (model.getState()=="draw"){
+			if (model.getState().equals("draw")){
 				label1 = new JLabel("It's a draw");
 			}
 			else label1 = new JLabel(color+" wins!");
 			state.setText("Game Over.");
 			
 			frame2.getRootPane().getGlassPane().setVisible(true);
+			savebutton.setEnabled(false);
 			frame3 = new JFrame("");
 			frame3.setResizable(false);
 			frame3.setSize(200, 150);
@@ -330,10 +324,10 @@ public class GameView {
 			frame3.setLocationRelativeTo(frame2);
 			frame3.setVisible(true);
 		}
-		else if (model.getState()== "remove") state.setText(color + "'s turn." + " Remove opponent piece.");
-		else if (model.getState()=="place") state.setText(color + "'s turn." + " Place piece.");
-		else if (model.getState()=="move") state.setText(color + "'s turn." + " Move piece.");
-		else if (model.getState()== "fly") state.setText(color + "'s turn." + " Move piece. Flying is permitted.");
+		else if (model.getState().equals("remove")) state.setText(color + "'s turn." + " Remove opponent piece.");
+		else if (model.getState().equals("place")) state.setText(color + "'s turn." + " Place piece.");
+		else if (model.getState().equals("move")) state.setText(color + "'s turn." + " Move piece.");
+		else if (model.getState().equals("fly")) state.setText(color + "'s turn." + " Move piece. Flying is permitted.");
 		
 	}
 		

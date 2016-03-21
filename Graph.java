@@ -84,6 +84,7 @@ public class Graph {
 	private static String NAME;
 	
 	protected static Node[] nodes;
+	public static ArrayList<double[]> NodeCoordinates = new ArrayList<double[]>();
 
 	public Graph() {
 		this(SIXSETUP);
@@ -101,7 +102,7 @@ public class Graph {
 		}
 	}
 	
-	public int getGraphSize(){
+	public static int getGraphSize(){
 		return nodes.length;
 	}
 	
@@ -118,7 +119,7 @@ public class Graph {
 		return nodes[n - 1].getNeighbors();
 	}
 
-	public void addToken(Piece C, int n) {
+	public static void addToken(Piece C, int n) {
 		nodes[n - 1].addToken(C);
 	}
 	

@@ -12,6 +12,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.io.FileNotFoundException;
 import java.util.*;
 
 public class GameController implements MouseListener, ActionListener {
@@ -33,14 +34,25 @@ public class GameController implements MouseListener, ActionListener {
 	public void actionPerformed(ActionEvent ae) {
 		String command = ae.getActionCommand();
 		if (command == "Save Game") {
-			
+			model.writeToSave();
+			view.notification("Game progress saved");
 		}
 		else if (command == "Continue from Save") {
+			try{
+				model.readFromSave(view.NodeCoordinates, view.PIECERADIUS);
+				view.viewReset();
+				view.initGameWindow();
+			}
+			catch (FileNotFoundException e){
+				view.notification("Error: No save file available!");	
+			}
 			
 		} 
+		
 		else if (command == "New Game") {
 			view.initGameWindow(); // calls view to create Set Pieces window
 		}
+		
 		else if (command=="Return to Main Menu"){
 			view.closeGame();
 			model.modelReset();
@@ -59,7 +71,6 @@ public class GameController implements MouseListener, ActionListener {
 
 		boolean unselect=false; //unselect the current piece
 		boolean changestate=false; //change the state of the active player
-		boolean changeplayer=false; //change the active player
 		int clickednode=0; //the node clicked (default 0)
 		for (int i = 0; i < model.getGraphSize(); i++) {
 			if (view.boardnodes.get(i).contains(me.getPoint())) {
@@ -76,8 +87,8 @@ public class GameController implements MouseListener, ActionListener {
 			if (model.getValidNodes().contains(clickednode)){  //If a valid location is clicked
 				if (model.getState().equals("place")){  //if the state is "place"
 					model.removePiece(model.getPieces().indexOf(model.getSelectedPiece())); //remove piece from the unplayed pieces array
-					model.setSelectedPieceX(view.boardnodes.get(clickednode-1).x); //change selected piece coordinates
-					model.setSelectedPieceY(view.boardnodes.get(clickednode-1).y);
+					model.setSelectedPieceX(view.boardnodes.get(clickednode-1).getX()); //change selected piece coordinates
+					model.setSelectedPieceY(view.boardnodes.get(clickednode-1).getY());
 					model.addToken(model.getSelectedPiece(), clickednode); //add piece to the board location
 					changestate=true;  
 
@@ -85,11 +96,12 @@ public class GameController implements MouseListener, ActionListener {
 				}		
 			
 				if (model.getState().equals("move") || model.getState().equals("fly")){
-					model.setSelectedPieceX(view.boardnodes.get(clickednode-1).x); //change selected piece coordinates
-					model.setSelectedPieceY(view.boardnodes.get(clickednode-1).y); 
+					model.setSelectedPieceX(view.boardnodes.get(clickednode-1).getX()); //change selected piece coordinates
+					model.setSelectedPieceY(view.boardnodes.get(clickednode-1).getY()); 
 					model.addToken(model.getSelectedPiece(), clickednode); //add piece to the board location
 					model.removeToken(model.getSelectedPieceNode()); //remove piece from previous board location
 					changestate=true;
+				
 
 				}
 			}
@@ -110,6 +122,7 @@ public class GameController implements MouseListener, ActionListener {
 				if (model.getValidNodes().contains(clickednode)){ //the clicked node is valid to remove
 					model.removeToken(clickednode); //remove the opponent piece.
 					changestate=true;
+					model.clearHistory(); //the can clear the history each time the number of pieces on the board changes (eg. piece removed).
 
 				}
 				else {
@@ -134,10 +147,11 @@ public class GameController implements MouseListener, ActionListener {
 		
 	}
 	if (changestate) model.changeState(clickednode); //change state if necessary
-	if (changestate && model.getState()!="win" && model.getState()!="draw"  && model.getState()!="remove") model.changeActivePlayer(); //change active player if necessary
+	if (changestate && (model.getState().equals("move")  || model.getState().equals("fly"))) model.updateHistory(); //add a snapshot of the current board. This is used to check for a "draw"
+	if (changestate && (model.getState().equals("place") || model.getState().equals("move")  || model.getState().equals("fly"))) model.changeActivePlayer(); //change active player if necessary
 	view.updateState(); //update how the state is presented in the view.
 	view.repaintPieces(); // repaint the pieces on the board.
-	if (changestate) model.updateHistory(); //add a snapshot of the current board. This is used to check for a "draw"
+	
 }
 
 
