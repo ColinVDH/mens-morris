@@ -86,12 +86,14 @@ public class Graph {
 	protected static Node[] nodes;
 	public static ArrayList<double[]> NodeCoordinates = new ArrayList<double[]>();
 
+	// Constructor for graph, set up for six mens morris
 	public Graph() {
 		this(SIXSETUP);
 		PIECENUMBER=6;
 		NAME="Six Men's Morris";
 	}
-
+	
+	// Constructor with inputted setup size for "x" mens morris
 	public Graph(double[][][] SETUP) {
 		nodes= new Node[SETUP.length];
 		for (int i = 0; i < SETUP.length; i++) {
@@ -102,40 +104,49 @@ public class Graph {
 		}
 	}
 	
+	//returns size of board
 	public static int getGraphSize(){
 		return nodes.length;
 	}
 	
+	//returns number of pieces
 	public int getPieceNumber(){
 		return PIECENUMBER;
 	}
 	
+	//returns title for game
 	public String getName(){
 		return NAME;
 	}
 
+	//returns neighbours for inputted node n
 	public int[] getNeighbors(int n) {
 		if (n<1 || n>getGraphSize()) throw new IllegalArgumentException("Node"+ n +" does not exist");
 		return nodes[n - 1].getNeighbors();
 	}
-
+	
+	// adds token for input piece C on node n
 	public static void addToken(Piece C, int n) {
 		nodes[n - 1].addToken(C);
 	}
 	
+	// removes token for piece on node n
 	public void removeToken(int n){
 		nodes[n-1].removeToken();
 	}
 
+	//returns token stack of input node n
 	public ArrayList<Piece> getTokenStack(int n) {
 		return nodes[n - 1].getTokenStack();
 	}
 
+	//returns neighbour length of input node n and element s
 	public double getNeighborlength(int n, int s) {
 		if (n<1 || n>getGraphSize()) throw new IllegalArgumentException("Node"+ n +" does not exist");
 		return nodes[n - 1].getNeighborlength(s);
 	}
 	
+	//returns neighbour angle of input node n and element s 
 	public int getNeighborangle(int n, int s) {
 		return nodes[n - 1].getNeighborangle(s);
 	}

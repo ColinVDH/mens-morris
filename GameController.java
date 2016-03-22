@@ -33,11 +33,11 @@ public class GameController implements MouseListener, ActionListener {
 	 */
 	public void actionPerformed(ActionEvent ae) {
 		String command = ae.getActionCommand();
-		if (command == "Save Game") {
+		if (command == "Save Game") { // Calls save game
 			model.writeToSave();
 			view.notification("Game progress saved");
 		}
-		else if (command == "Continue from Save") {
+		else if (command == "Continue from Save") { // Sets up board from last save
 			try{
 				model.readFromSave(view.NodeCoordinates, view.PIECERADIUS);
 				view.viewReset();
@@ -49,11 +49,11 @@ public class GameController implements MouseListener, ActionListener {
 			
 		} 
 		
-		else if (command == "New Game") {
+		else if (command == "New Game") { //Creates new game
 			view.initGameWindow(); // calls view to create Set Pieces window
 		}
 		
-		else if (command=="Return to Main Menu"){
+		else if (command=="Return to Main Menu"){ //Returns to main menu
 			view.closeGame();
 			model.modelReset();
 			view.viewReset();
