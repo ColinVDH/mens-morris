@@ -35,10 +35,8 @@ public class GameModel extends Graph {
 	public static ArrayList<Color[]> history =new ArrayList<Color[]>();
 	private static boolean computermode;
 	private static Color computercolor;
-	private int MCTS_ITERATIONS=25000;
-	private boolean newgame=true;
-	private TreeNode rootNode;
-
+	private int MCTS_ITERATIONS=10000;
+	static String s="/com/aci/sixmensmorris";
 
 
 
@@ -365,12 +363,9 @@ public class GameModel extends Graph {
 				}
 			}
 		}
-		if (newstate.equals("remove")) clearHistory();
 		if (opponentmovesAvailable()==false) newstate="win";
 		else if (repeatedPosition()) newstate="draw";
-		
 		setState(newstate);
-		
 	}
 	/**
 	 * clears the history array to erase history of previous board arrangements.
@@ -394,7 +389,7 @@ public class GameModel extends Graph {
 	 * check if the current board arrangement matches one in the history array
 	 */
 	private boolean repeatedPosition(){
-		if (!getState().equals("place") && !getState().equals("remove")){
+		if (getState()!="place" && getState()!="remove"){
 			for (int i=0;i<history.size();i++){
 				int counter=0;
 				Color[] oldgraph=history.get(i);
@@ -457,6 +452,7 @@ public class GameModel extends Graph {
 		public void writeToSave() {
 			try {
 				// opens a PrintStream for each of the files
+			
 				FileOutputStream f= new FileOutputStream(Main.class.getResource("/save.txt").getFile());
 				PrintStream save= new PrintStream(f);
 				String boardstring="";
@@ -508,7 +504,6 @@ public class GameModel extends Graph {
 	 * saved game.
 	 */
 	public void readFromSave(ArrayList<double[]> nodecoordinates, int pieceradius) throws FileNotFoundException{
-		
 		InputStream in= this.getClass().getResourceAsStream("/save.txt");
 		Scanner input = new Scanner(in);
 		
@@ -602,15 +597,14 @@ public class GameModel extends Graph {
 
 	
 
+
 	
 	/*
 	 * This function uses a Monte Carlo Tree Search algorithm to find the best move for the computer to make. 
 	 */
 	public int[] getComputerMove(){
+		TreeNode rootNode=new TreeNode(new GameState(true)); //make the root node
 		
-
-		rootNode=new TreeNode(new GameState(true)); //make the root node
-			
 		for (int i=0;i<MCTS_ITERATIONS;i++){ //repeat algorithm for the desired number of iterations
 			TreeNode node=rootNode; //copy the root
 			GameState state=node.state.Clone(); //clone the state of the root
@@ -642,7 +636,7 @@ public class GameModel extends Graph {
 			}
 		}
 
-		Collections.sort(rootNode.childNodes, (c1,c2) -> c1.wins.compareTo(c2.wins));  //sort nodes by number of visits
+		Collections.sort(rootNode.childNodes, (c1,c2) -> c1.visits.compareTo(c2.visits));  //sort nodes by number of visits
 		int[] move=new int[3];
 		for (int i=0;i<3;i++){
 			move[i]=rootNode.childNodes.get(rootNode.childNodes.size()-1).move[i]+1; //construct move array from node with the most number of visits
@@ -745,11 +739,9 @@ public class GameModel extends Graph {
 			if (move[0]==-1){ //off board piece picked up
 				this.piecenumbers[this.playerMoved][0]-=1;
 				this.piecenumbers[this.playerMoved][1]+=1;
-				this.history2=new ArrayList<int[]>(); //erase history
 			}
 			else{
 				this.board[move[0]]=0; //on board piece picked up
-				history2.add(this.board);
 			}
 			
 			this.board[move[1]]=this.playerMoved; //piece placed
@@ -817,16 +809,17 @@ public class GameModel extends Graph {
 		 * Get the game result from the viewpoint of plater p.
 		 */
 		public double getResult(int p){
-			for (int[] i: this.history2){
-				if (Arrays.equals(i, this.board)){
-						return 0.1;
-				}
-			}
 			if (this.getMoves(true).isEmpty() && 3-this.playerMoved==p) return 0.0;
-			if (this.piecenumbers[p][1]<3) return 0.0;
-			if (this.getMoves(true).isEmpty() && 3-this.playerMoved!=p) return 1.0;
-			if (this.piecenumbers[3-p][1]<3) return 1.0;
-			
+			else if (this.piecenumbers[p][1]<3) return 0.0;
+			else if (this.getMoves(true).isEmpty() && 3-this.playerMoved!=p) return 1.0;
+			else if (this.piecenumbers[3-p][1]<3) return 1.0;
+//			else {
+//				for (int[] i: this.history2){
+//					if (Arrays.equals(i, this.board)){
+//						return 0.5;
+//					}
+//				}
+//			}
 			assert false;
 			return 0.0;
 		}

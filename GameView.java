@@ -15,8 +15,7 @@ import java.util.ArrayList;
 import javax.swing.*;
 
 public class GameView {
-	
-	//Game Dimensions
+
 	public static final int GAMEWIDTH = 800;
 	public static final int GAMEHEIGHT = 800;
 	public static final double SIZE_MULTIPLIER = 0.6; // size of board
@@ -348,7 +347,6 @@ public class GameView {
 		else if (model.isComputerMode()) player="(Player)";
 		
 		
-		// Displays winner
 		if (model.getState().equals("draw") || model.getState().equals("win")){
 			JLabel label1;
 			if (model.getState().equals("draw")){
@@ -384,16 +382,7 @@ public class GameView {
 			frame3.setLocationRelativeTo(frame2);
 			frame3.setVisible(true);
 		}
-<<<<<<< HEAD
 		state.setText(color + "'s turn "+player);
-=======
-		// Display current state of the game
-		else if (model.getState().equals("remove")) state.setText(color + "'s turn." + " Remove opponent piece.");
-		else if (model.getState().equals("place")) state.setText(color + "'s turn." + " Place piece.");
-		else if (model.getState().equals("move")) state.setText(color + "'s turn." + " Move piece.");
-		else if (model.getState().equals("fly")) state.setText(color + "'s turn." + " Move piece. Flying is permitted.");
-		
->>>>>>> origin/master
 	}
 		
 	
