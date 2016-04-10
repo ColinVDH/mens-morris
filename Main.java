@@ -1,7 +1,6 @@
 package com.aci.sixmensmorris;
 
 
-
 public class Main {
 
 	// Initialize model, view and controller to start game.
@@ -9,7 +8,8 @@ public class Main {
 		GameModel model= new GameModel();  //initialize all components of MVC
 		GameView view= new GameView(model);
 		GameController control=new GameController(model, view);
-		view.registerListeners(control); //control registers as a listener to the model
-
+		view.registerListeners(control); //registers the controller as a listener to the model.
+		
+	
 	}
 }

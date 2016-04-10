@@ -11,9 +11,7 @@ package com.aci.sixmensmorris;
 
 import java.awt.*;
 import java.awt.geom.*;
-import java.awt.image.ImageObserver;
 import java.util.ArrayList;
-import java.util.Arrays;
 import javax.swing.*;
 
 public class GameView {
@@ -26,22 +24,29 @@ public class GameView {
 	public static final int NODE1_Y = (int) ((double) GAMEHEIGHT*0.180);
 	public static final int PIECERADIUS = 45; // size of piece & board locations
 	public static ArrayList<Ellipse2D.Double> boardnodes = new ArrayList<Ellipse2D.Double>();
-
-	private static GameModel model;
 	public static ArrayList<double[]> NodeCoordinates = new ArrayList<double[]>();
+	
+	private static GameModel model;
 	private static JFrame frame; // mainmenu frame
-	private static JFrame frame2; // gameboard frame
+	public static JFrame frame2; // gameboard frame
 	private static JFrame frame3; //gameover frame
+	private static JFrame frame4; //pick gamemode frame
 	private static JButton newgame = new JButton("New Game");
 	private static JButton mainmenu = new JButton("Return to Main Menu");
+	
 	private static JButton savebutton = new JButton("Save Game");
 	private static JButton continuebutton = new JButton("Continue from Save");
+	private static JButton oneplayer = new JButton("Player vs. Computer");
+	private static JButton twoplayer = new JButton("Player vs. Player");
+	
 	private static GameBoard board = new GameBoard();
 	private static Pieces pieces = new Pieces();
 
 	private static JLabel state = new JLabel(); //Text describing the current game state
-	private static Dimension dim = Toolkit.getDefaultToolkit().getScreenSize(); 
+	private static Dimension dim = Toolkit.getDefaultToolkit().getScreenSize(); //get the dimensions of the screen (so that the game can be initialized in the middle)
 
+    private static JLabel loadingmessage= new JLabel("Thinking... ");
+    
 	public GameView(GameModel model) {
 		
 		
@@ -62,7 +67,9 @@ public class GameView {
 			model.addPiece(bluepiece);
 		}
 	}
-
+	/**
+	 * Resets all the game variables to their start-of-game values
+	 */
 	public void viewReset(){
 		for (int i = 0; i < model.getRedStack(); i++) {
 			Piece redpiece = new Piece(Color.RED, (double) GAMEWIDTH / 2 - PIECERADIUS / 2 -3,  60 , PIECERADIUS);
@@ -72,6 +79,7 @@ public class GameView {
 			Piece bluepiece = new Piece(Color.BLUE, (double) GAMEWIDTH / 2 - PIECERADIUS / 2 -3 , GAMEHEIGHT-135, PIECERADIUS);
 			model.addPiece(bluepiece);
 		}
+		
 	}
 	/**
 	 * Recursively generate all node coordinates.
@@ -105,7 +113,7 @@ public class GameView {
 	
 	
 	
-	// Initialize main menu
+/*	 Initialize main menu*/
 	public void initMenu() {
 		
 		frame = new JFrame("Main Menu");
@@ -233,7 +241,7 @@ public class GameView {
 	}
 	
 	// Initialize the frame containing the game board.
-	public void initGameWindow() {
+	public void initGameWindow(boolean newgame) {
 		frame.dispose();
 		frame2 = new JFrame(model.getName());
 		
@@ -251,14 +259,20 @@ public class GameView {
 		c.gridy = 0;
 		savebutton.setEnabled(true);
 		board.add(savebutton, c);
-
 		
 		c.anchor = GridBagConstraints.NORTH;
 		board.add(state, c);
+		c.anchor = GridBagConstraints.NORTHEAST;
+		loadingmessage.setFont(new Font("Calibri", Font.BOLD, 25));
+		loadingmessage.setVisible(false);
+		board.add(loadingmessage,c);
+		
 		state.setFont(new Font("Calibri", Font.BOLD, 25));
 		frame2.add(pieces);
 		frame2.add(board);
 		frame2.add(background);
+		
+
 	
 		frame2.getRootPane().setGlassPane(new JComponent() {
 		    public void paintComponent(Graphics g) {
@@ -268,8 +282,8 @@ public class GameView {
 		    }
 		});
 		
+		
 		frame2.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-
 		board.setBounds(0, 0, GAMEWIDTH, GAMEHEIGHT);
 		pieces.setBounds(0, 0, GAMEWIDTH, GAMEHEIGHT);
 		board.setOpaque(false);
@@ -277,6 +291,46 @@ public class GameView {
 		frame2.setResizable(false);
 		frame2.setLocation(dim.width/2-frame2.getSize().width/2, dim.height/2-frame2.getSize().height/2);
 		frame2.setVisible(true);
+		
+		
+		
+		if (newgame){ //new game, meaning that mode selection frame must appear. 
+			state.setVisible(false);
+			frame2.getRootPane().getGlassPane().setVisible(true);
+			frame2.setEnabled(false);
+			savebutton.setEnabled(false);
+		
+		
+			frame4 = new JFrame("");
+			
+			frame4.setResizable(false);
+			frame4.setSize(200, 200);
+			frame4.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+			frame4.setLocationRelativeTo(frame2);
+			
+			JPanel panel = new JPanel(new GridBagLayout());
+			frame4.getContentPane().add(panel, BorderLayout.NORTH);
+			GridBagConstraints cc = new GridBagConstraints();
+		
+			JLabel label = new JLabel("Pick game mode:");
+			label.setFont(new Font("Calibri", Font.BOLD, 25));
+			cc.gridx = 0;
+			cc.gridy = 8;
+			cc.insets = new Insets(10, 10, 10, 10);
+			panel.add(label, cc);
+		
+			cc.gridx = 0;
+			cc.gridy = 9;
+			cc.insets = new Insets(10, 10, 10, 10);
+			panel.add(oneplayer, cc);
+			
+			cc.gridx = 0;
+			cc.gridy = 10;
+			cc.insets = new Insets(10, 10, 10, 10);
+			panel.add(twoplayer, cc);
+			
+			frame4.setVisible(true);
+		}
 		updateState();
 	}
 	
@@ -287,24 +341,28 @@ public class GameView {
 
 	// Update the state text. If the game is won, it also opens the Game Over frame, allowing the player to return to the Main Menu.
 	public void updateState() {
-		String color; String color2;
-		if (model.getActivePlayer() == Color.RED) color = "Red";
-		else color = "Blue";
+		String color; String player="";
+		if (model.getActivePlayer() == Color.RED) color="Red";
+		else color="Blue";
+		if (model.isComputerMode() && model.getActivePlayer()==model.getComputerColor()) player="(Computer)";
+		else if (model.isComputerMode()) player="(Player)";
+		
 		
 		// Displays winner
 		if (model.getState().equals("draw") || model.getState().equals("win")){
 			JLabel label1;
 			if (model.getState().equals("draw")){
-				label1 = new JLabel("It's a draw");
+				label1 = new JLabel("It's a draw!");
 			}
-			else label1 = new JLabel(color+" wins!");
+			else label1 = new JLabel(color+" "+player+" wins!");
 			state.setText("Game Over.");
 			
 			frame2.getRootPane().getGlassPane().setVisible(true);
+			frame2.setEnabled(false);
 			savebutton.setEnabled(false);
 			frame3 = new JFrame("");
 			frame3.setResizable(false);
-			frame3.setSize(200, 150);
+			frame3.setSize(300, 150);
 			frame3.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 			
 
@@ -326,12 +384,16 @@ public class GameView {
 			frame3.setLocationRelativeTo(frame2);
 			frame3.setVisible(true);
 		}
+<<<<<<< HEAD
+		state.setText(color + "'s turn "+player);
+=======
 		// Display current state of the game
 		else if (model.getState().equals("remove")) state.setText(color + "'s turn." + " Remove opponent piece.");
 		else if (model.getState().equals("place")) state.setText(color + "'s turn." + " Place piece.");
 		else if (model.getState().equals("move")) state.setText(color + "'s turn." + " Move piece.");
 		else if (model.getState().equals("fly")) state.setText(color + "'s turn." + " Move piece. Flying is permitted.");
 		
+>>>>>>> origin/master
 	}
 		
 	
@@ -343,22 +405,43 @@ public class GameView {
 		JOptionPane.showMessageDialog(frame3, string);
 	}
 	
-	//close the game / game-over frame. 
+	//close the game frame and game-over frame. 
 	public void closeGame(){
 		frame2.dispose();
 		frame3.dispose();
 	}
+	
+	public void closeModeFrame(){
+		
+		frame2.getRootPane().getGlassPane().setVisible(false);
+		frame2.setEnabled(true);
+		savebutton.setEnabled(true);
+		updateState();
+		frame4.dispose();
+		state.setVisible(true);
+	}
 
-	// register the controller as a listener to all the buttons and the game board.
+/* register the controller as a listener to all the buttons and the game board.*/
 	public void registerListeners(GameController controller) {
 		board.addMouseListener(controller);
 		savebutton.addActionListener(controller);
 		newgame.addActionListener(controller);
 		mainmenu.addActionListener(controller);
 		continuebutton.addActionListener(controller);
+		oneplayer.addActionListener(controller);
+		twoplayer.addActionListener(controller);
 	}
-
-
+	
+//show the "thinking" text
+	public void showThinking(boolean yes) {
+		if (yes){
+			loadingmessage.setVisible(true);
+		}
+		else {
+			loadingmessage.setVisible(false);
+		}
+	}
+	
 	
 
 }

@@ -103,6 +103,29 @@ public class Graph {
 			nodes[i] = new Node(SETUP[i][1], SETUP[i][2], SETUP[i][3]);
 		}
 	}
+<<<<<<< HEAD
+	/**
+	 * get the size of the graph (16 in the case of six men's morris)
+	 */
+	public static int getGraphSize(){
+		return nodes.length;
+	}
+	/**
+	 * get the number of pieces allotted to each player (6 in the case of six men's morris)
+	 */
+	public int getPieceNumber(){
+		return PIECENUMBER;
+	}
+	/**
+	 * get the name of this game (eg. "Six Men's Morris")
+	 */
+	public String getName(){
+		return NAME;
+	}
+	/**
+	 * Get the array with the node numbers of all neighbors to the inputted node
+	 */
+=======
 	
 	//returns size of board
 	public static int getGraphSize(){
@@ -120,10 +143,34 @@ public class Graph {
 	}
 
 	//returns neighbours for inputted node n
+>>>>>>> origin/master
 	public int[] getNeighbors(int n) {
 		if (n<1 || n>getGraphSize()) throw new IllegalArgumentException("Node"+ n +" does not exist");
 		return nodes[n - 1].getNeighbors();
 	}
+<<<<<<< HEAD
+	/**
+	 * Add a piece to the inputted node
+	 */
+	public static void addToken(Piece C, int n) {
+		nodes[n - 1].addToken(C);
+	}
+	/**
+	 * Remove a piece from the inputted node
+	 */
+	public void removeToken(int n){
+		nodes[n-1].removeToken();
+	}
+	/**
+	 * get the stack of all pieces on a particular node
+	 */
+	public ArrayList<Piece> getTokenStack(int n) {
+		return nodes[n - 1].getTokenStack();
+	}
+	/**
+	 * get the length between this node n and its neighbor s.
+	 */
+=======
 	
 	// adds token for input piece C on node n
 	public static void addToken(Piece C, int n) {
@@ -141,12 +188,19 @@ public class Graph {
 	}
 
 	//returns neighbour length of input node n and element s
+>>>>>>> origin/master
 	public double getNeighborlength(int n, int s) {
 		if (n<1 || n>getGraphSize()) throw new IllegalArgumentException("Node"+ n +" does not exist");
 		return nodes[n - 1].getNeighborlength(s);
 	}
+<<<<<<< HEAD
+	/**
+	 * get the angle between this node n and its neighbor s.
+	 */
+=======
 	
 	//returns neighbour angle of input node n and element s 
+>>>>>>> origin/master
 	public int getNeighborangle(int n, int s) {
 		return nodes[n - 1].getNeighborangle(s);
 	}

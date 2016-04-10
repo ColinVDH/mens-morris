@@ -15,7 +15,13 @@ public class Node {
 	private int[] neighborangles;
 	
 
+<<<<<<< HEAD
+	/**
+	 * node constructor inputs the neighbors, neighbor's angles and neighbors lengths into the appropriate arrays. 
+	 */
+=======
 	//Constructor for node inputs neighbours, neighbour angles and lengths.
+>>>>>>> origin/master
 	public Node(double[] neighbors,  double[] neighborangles, double[] neighborlengths) {
 		
 		this.neighborlengths=neighborlengths;
@@ -29,6 +35,47 @@ public class Node {
 		this.neighborangles=neighborangles_int;
 		this.neighbors=neighbors_int;
 	}
+<<<<<<< HEAD
+	/**
+	 * get all neighbors
+	 */
+	public int[] getNeighbors() {
+		return this.neighbors;
+	}
+	/**
+	 * get the lengths to all neighbors
+	 */
+	public double getNeighborlength(int n) {
+		return neighborlengths[getIndexOf(n, neighbors)];
+	}
+	/**
+	 * get the angles to all neighbors
+	 */
+	public int getNeighborangle(int n){
+		return neighborangles[getIndexOf(n, neighbors)];
+	}
+	/**
+	 * add a piece to this node
+	 */
+	public void addToken(Piece C) {
+		tokenstack.add(C);
+	}
+	/**
+	 * remove a piece from this node 
+	 */
+	public void removeToken() {
+		tokenstack.remove(tokenstack.size()-1);
+	}
+	/**
+	 * return the stack of all pieces on this node
+	 */
+	public ArrayList<Piece> getTokenStack(){
+		return tokenstack;
+	}
+	/**
+	 * get the index of a particular integer (i.e. node number) in an array.
+	 */
+=======
 
 	//Returns the neighbours of node
 	public int[] getNeighbors() {
@@ -61,6 +108,7 @@ public class Node {
 	}
 	
 	//finds index of integer in array tab
+>>>>>>> origin/master
 	private int getIndexOf( int toSearch, int[] tab )
 		{
 		  for( int i=0; i< tab.length ; i ++ )
@@ -68,7 +116,7 @@ public class Node {
 		     return i;
 
 		  return -1;
-		}//met
+		}
 	
 
 }

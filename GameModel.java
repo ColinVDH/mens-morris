@@ -7,42 +7,40 @@ package com.aci.sixmensmorris;
 
 import java.awt.Color;
 
-import java.math.*;
-import java.awt.event.MouseEvent;
-import java.awt.geom.Ellipse2D;
-import java.io.BufferedReader;
+
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.util.*;
+import java.util.prefs.Preferences;
+import java.io.InputStream;
+
 
 public class GameModel extends Graph {
 
-	private static Piece selectedpiece = null;
-	private static Integer selectedpiecenode = null; // the node from where the
-														// selected piece
-														// originates
-	private static ArrayList<Piece> pieces = new ArrayList<Piece>(); // all
-																		// unplayed
-																		// pieces
-	private static Color activeplayer; // current player
-	private static String redstate; // state of the blue player ("place",
-									// "move", "fly", "remove", "win")
-	private static String bluestate; // state of the red player ("place",
-										// "move", "fly", "remove", "win")
-	private static int redcountonboard; // the number of pieces that the red
-										// player has on the board
-	private static int bluecountonboard; // the number of pieces that the blue
-											// player has on the board
-	private static int redcountoffboard; // number of red pieces not yet placed
-	private static int bluecountoffboard; // number of blue pieces not yet
-											// placed
-	private static ArrayList<Color[]> history = new ArrayList<Color[]>(); //array list of previous board arrangements
+
+	private static Piece selectedpiece = null; 
+	private static Integer selectedpiecenode = null; //the node from where the selected piece originates
+	private static ArrayList<Piece> pieces = new ArrayList<Piece>(); //all unplayed pieces
+	private static Color activeplayer; //current player
+	private static String redstate; //state of the blue player ("place", "move", "fly", "remove", "win")
+	private static String bluestate; //state of the red player  ("place", "move", "fly", "remove", "win")
+	public static int redcountonboard; //the number of pieces that the red player has on the board
+	public static int bluecountonboard; //the number of pieces that the blue player has on the board
+	public static int redcountoffboard;
+	public static int bluecountoffboard;
+	public static ArrayList<Color[]> history =new ArrayList<Color[]>();
+	private static boolean computermode;
+	private static Color computercolor;
+	private int MCTS_ITERATIONS=25000;
+	private boolean newgame=true;
+	private TreeNode rootNode;
+
+
+
 
 	/**
 	 * The constructor picks a random first player, and sets each player's
@@ -50,10 +48,11 @@ public class GameModel extends Graph {
 	 */
 	public GameModel() {
 		Color[] players = { Color.RED, Color.BLUE };
+		computercolor= players[new Random().nextInt(2)];
 		activeplayer = players[new Random().nextInt(2)];
 		redstate = "place";
 		redcountonboard = 0;
-		redcountoffboard = getPieceNumber();
+		redcountoffboard=getPieceNumber();
 		bluestate = "place";
 		bluecountonboard = 0;
 		bluecountoffboard = getPieceNumber();
@@ -64,26 +63,27 @@ public class GameModel extends Graph {
 	 */
 	public void modelReset() {
 		Color[] players = { Color.RED, Color.BLUE };
-		selectedpiece = null;
+		selectedpiece = null; 
 		selectedpiecenode = null;
 		activeplayer = players[new Random().nextInt(2)];
+		computercolor= players[new Random().nextInt(2)];
+
 		redstate = "place";
 		bluestate = "place";
 		redcountonboard = 0;
-		redcountoffboard = getPieceNumber();
+		redcountoffboard=getPieceNumber();
 		bluecountonboard = 0;
 		bluecountoffboard = getPieceNumber();
 		for (int i = 0; i < getGraphSize(); i++) {
 			removeBoardPiece(i + 1);
 		}
 
-		pieces = new ArrayList<Piece>();
-		history = new ArrayList<Color[]>();
+		pieces= new ArrayList<Piece>();
+		history =new ArrayList<Color[]>();
 
 	}
-
-	/*
-	 * Changes the player between red and blue based on current player
+	/**
+	 * Changes active player from red to blue, and vice versa
 	 */
 	public void changeActivePlayer() {
 		if (activeplayer == Color.RED) {
@@ -92,28 +92,15 @@ public class GameModel extends Graph {
 			activeplayer = Color.RED;
 		}
 	}
-
-	/*
-	 * Returns current active player
+	/**
+	 * Returns active player (red or blue). 
 	 */
 	public Color getActivePlayer() {
 		return activeplayer;
 	}
-
+	
 	/**
-	 * Returns true if the player has finished placing all of his pieces on the
-	 * board.
-	 */
-	public boolean allPiecesPlaced(Color c) {
-		for (Piece p : pieces) {
-			if (p.getColor() == c)
-				return false;
-		}
-		return true;
-	}
-
-	/*
-	 * Sets inputed piece as selected piece
+	 * Set the piece that has been selected by user
 	 */
 	public void setSelectedPiece(Piece p) {
 		selectedpiece = p;
@@ -126,15 +113,15 @@ public class GameModel extends Graph {
 		selectedpiece.x = x;
 	}
 
+
 	/**
 	 * change y-coordinate of selected piece
 	 */
 	public void setSelectedPieceY(double y) {
 		selectedpiece.y = y;
 	}
-
-	/*
-	 * Return selected piece
+	/**
+	 * Get the currently selected piece
 	 */
 	public Piece getSelectedPiece() {
 		return selectedpiece;
@@ -147,34 +134,30 @@ public class GameModel extends Graph {
 	public Integer getSelectedPieceNode() {
 		return selectedpiecenode;
 	}
-
-	// Sets the current selected piece's node to input
-	// value of i.
+	/**
+	 * store the node where the selected piece is located
+	 */
 	public void setSelectedPieceNode(Integer i) {
 		selectedpiecenode = i;
 	}
-
-	/*
-	 * Returns the arraylist of pieces left on the board
+	/**
+	 * get all unplayed pieces in an arraylist
 	 */
 	public ArrayList<Piece> getPieces() {
 		return pieces;
 	}
-
-	/*
-	 * Returns the number of red pieces yet to be placed on the board
+	/**
+	 * get the number of unplayed red pieces
 	 */
-	public int getRedStack() {
+	public int getRedStack(){
 		return redcountoffboard;
 	}
-
-	/*
-	 * Returns the number of blue pieces yet to be placed on the board
+	/**
+	 * get the number of unplayed blue pieces
 	 */
-	public int getBlueStack() {
+	public int getBlueStack(){
 		return bluecountoffboard;
 	}
-
 	/**
 	 * Remove a piece from the array of unplayed pieces, at a particular index.
 	 */
@@ -232,7 +215,7 @@ public class GameModel extends Graph {
 										if (validnodes.get(j) == nn || validnodes.get(j) == n
 												|| validnodes.get(j) == i + 1) {
 											validnodes.remove(j);
-											System.out.println("remove node");
+											
 										}
 									}
 								}
@@ -249,14 +232,12 @@ public class GameModel extends Graph {
 		}
 
 		else {
-			if ((getState().equals("place") && selectedpiecenode == null) || getState().equals("fly")) { // if
-																											// out
-																											// of
-																											// play
-																											// piece;
+			if ((getState().equals("place") && selectedpiecenode == null) || getState().equals("fly")) { // if out of play piece;
+																											
+																											
 				for (int i = 0; i < getGraphSize(); i++) {
 					if (getTokenStack(i + 1).isEmpty()) {
-						validnodes.add(i + 1);
+						validnodes.add(i + 1); 
 					}
 				}
 			} else if (getState().equals("move")) { // piece on board
@@ -270,7 +251,26 @@ public class GameModel extends Graph {
 		}
 		return validnodes;
 	}
-
+	/**
+	 * Turn computer mode on or off.
+	 */
+	public void setComputerMode(boolean b){   
+		computermode=b;
+	}
+	
+	/**
+	 * Checks if computer mode is active
+	 */
+	public boolean isComputerMode(){
+		return computermode;
+	}
+	
+	/**
+	 * Get the color of the computer player
+	 */
+	public Color getComputerColor(){
+		return computercolor;
+	}
 	/**
 	 * Returns the state of the active player
 	 */
@@ -284,7 +284,7 @@ public class GameModel extends Graph {
 	/**
 	 * sets the state of the active player
 	 */
-	public void setState(String state) {
+	private void setState(String state) {
 		if (activeplayer == Color.RED)
 			redstate = state;
 		else
@@ -300,18 +300,18 @@ public class GameModel extends Graph {
 		String newstate = "";
 		ArrayList<Integer> angles = new ArrayList<Integer>();
 
-		if (oldstate.equals("remove")) {
+		if (oldstate.equals("remove")) {   
 			if (activeplayer == Color.RED)
-				bluecountonboard--;
+				bluecountonboard--; //decrement the blue pieces on board
 			else
-				redcountonboard--;
+				redcountonboard--; //decrement the red pieces on board
 
-			if (!allPiecesPlaced(activeplayer))
+			if ((redcountoffboard!=0 && activeplayer==Color.RED) || (bluecountoffboard!=0 && activeplayer==Color.BLUE))
 				newstate = "place";
 			else {
 				newstate = "move";
-				if (activeplayer == Color.RED && bluecountonboard <= 2
-						|| activeplayer == Color.BLUE && redcountonboard <= 2)
+				if ((activeplayer == Color.RED && bluecountonboard <= 2 && bluecountoffboard==0)
+					|| (activeplayer == Color.BLUE && redcountonboard <= 2 && redcountoffboard==0))
 					newstate = "win";
 				// if (activeplayer==Color.RED && bluecount==3) bluestate="fly";
 				// if (activeplayer==Color.BLUE && redcount==3) redstate="fly";
@@ -319,14 +319,15 @@ public class GameModel extends Graph {
 		}
 
 		else if (oldstate.equals("place")) {
-			if (activeplayer == Color.RED) {
-				redcountonboard++;
-				redcountoffboard--;
-			} else {
-				bluecountonboard++;
-				bluecountoffboard--;
+			if (activeplayer == Color.RED){
+				redcountonboard++;  //incremend red pieces on board
+				redcountoffboard--;  //decrement red pieces off board
 			}
-			if (allPiecesPlaced(activeplayer))
+			else {
+				bluecountonboard++; //incremend blue pieces on board
+				bluecountoffboard--; //decrement blue pieces off board
+			}
+			if ((redcountoffboard==0 && activeplayer==Color.RED) || (bluecountoffboard==0 && activeplayer==Color.BLUE))
 				newstate = "move";
 			else
 				newstate = "place";
@@ -335,7 +336,7 @@ public class GameModel extends Graph {
 		else if (oldstate.equals("move"))
 			newstate = "move";
 
-		else if (oldstate.equals("fly"))
+		else if (oldstate.equals("fly")) 
 			newstate = "fly";
 
 		if (oldstate.equals("place") || oldstate.equals("move") || oldstate.equals("fly")) {
@@ -364,51 +365,56 @@ public class GameModel extends Graph {
 				}
 			}
 		}
-		if (opponentmovesAvailable() == false)
-			newstate = "win";
-		else if (repeatedPosition())
-			newstate = "draw";
+		if (newstate.equals("remove")) clearHistory();
+		if (opponentmovesAvailable()==false) newstate="win";
+		else if (repeatedPosition()) newstate="draw";
+		
 		setState(newstate);
+		
 	}
-
-	public void clearHistory() {
-		history = new ArrayList<Color[]>();
+	/**
+	 * clears the history array to erase history of previous board arrangements.
+	 */
+	public void clearHistory(){
+		history= new ArrayList<Color[]>();
 	}
-
-	public void updateHistory() {
-		Color[] currentgraph = new Color[getGraphSize()];
-		for (int i = 0; i < getGraphSize(); i++) {
-			if (nodes[i].getTokenStack().isEmpty())
-				currentgraph[i] = null;
-			else
-				currentgraph[i] = nodes[i].getTokenStack().get(0).getColor();
+	/**
+	 * add current board arrangement to the history array.
+	 */
+	public void updateHistory(){
+		Color[] currentgraph=new Color[getGraphSize()];
+		for (int i=0;i<getGraphSize();i++){
+			if (nodes[i].getTokenStack().isEmpty()) currentgraph[i]=null;
+			else currentgraph[i]=nodes[i].getTokenStack().get(0).getColor();
 		}
 		history.add(currentgraph);
-		System.out.println("ADDED");
+		
 	}
-
-	/*
-	 * Checks if board placement in history has been repeated
+	/**
+	 * check if the current board arrangement matches one in the history array
 	 */
-	public boolean repeatedPosition() {
-		if (getState() != "place" && getState() != "remove") {
-			for (int i = 0; i < history.size(); i++) {
-				int counter = 0;
-				Color[] oldgraph = history.get(i);
-				for (int j = 0; j < getGraphSize(); j++) {
-					if ((oldgraph[j] == null && nodes[j].getTokenStack().isEmpty())
-							|| (oldgraph[j] != null && !nodes[j].getTokenStack().isEmpty()
-									&& oldgraph[j] == nodes[j].getTokenStack().get(0).getColor())) {
-						counter += 1;
+	private boolean repeatedPosition(){
+		if (!getState().equals("place") && !getState().equals("remove")){
+			for (int i=0;i<history.size();i++){
+				int counter=0;
+				Color[] oldgraph=history.get(i);
+				for (int j=0;j<getGraphSize(); j++){
+					if ((oldgraph[j]==null && nodes[j].getTokenStack().isEmpty())
+							|| (oldgraph[j]!=null && !nodes[j].getTokenStack().isEmpty() 
+							&& oldgraph[j]==nodes[j].getTokenStack().get(0).getColor())){
+						counter+=1;
 					}
-					System.out.println(counter);
+					
 				}
-				if (counter == getGraphSize())
-					return true;
+				if (counter==getGraphSize()) return true;
 			}
 		}
 		return false;
 	}
+	
+
+
+
 
 	/**
 	 * Checks to see if the opponent has any legal moves available. A player can
@@ -416,7 +422,7 @@ public class GameModel extends Graph {
 	 * adjacent locations. If his state is "place" or "fly" there will always be
 	 * a valid empty location to place a piece.
 	 */
-	public boolean opponentmovesAvailable() {
+	private boolean opponentmovesAvailable() {
 		Color enemy;
 		String enemystate;
 		if (activeplayer == Color.RED) {
@@ -442,131 +448,442 @@ public class GameModel extends Graph {
 		return true;
 	}
 
+	
 	/*
 	 * If save button is pressed in game, this function is called. It writes all
 	 * the current location of all pieces to the save file. Only allows one save
 	 * game state at a time.
 	 */
-	public void writeToSave() {
-		try {
-			// opens a PrintStream for each of the files
-			PrintStream save = new PrintStream(new File("save.txt"));
-			String boardstring = "";
-			for (int i = 0; i < getGraphSize(); i++) {
-				if (!getTokenStack(i + 1).isEmpty() && getTokenStack(i + 1).get(0).getColor() == Color.RED)
-					boardstring = boardstring + "red" + ",";
-				else if (!getTokenStack(i + 1).isEmpty() && getTokenStack(i + 1).get(0).getColor() == Color.BLUE)
-					boardstring = boardstring + "blue" + ",";
-				else
-					boardstring = boardstring + "null" + ",";
-			}
-
-			boardstring = boardstring.substring(0, boardstring.length() - 1);
-
-			save.println(boardstring); // close the PrintStreams
-			if (activeplayer == Color.RED)
-				save.println("red");
-			else
-				save.println("blue");
-			save.println(redstate);
-			save.println(redcountoffboard);
-			save.println(bluestate);
-			save.println(bluecountoffboard);
-			for (Color[] carray : history) {
-				String historystring = "";
-				for (Color c : carray) {
-					if (c == Color.RED) //if red piece on board, save as red
-						historystring = historystring + "red" + ",";
-					else if (c == Color.BLUE) // if blue, save as blue
-						historystring = historystring + "blue" + ",";
-					else // else null
-						historystring = historystring + "null" + ",";
+		public void writeToSave() {
+			try {
+				// opens a PrintStream for each of the files
+				FileOutputStream f= new FileOutputStream(Main.class.getResource("/save.txt").getFile());
+				PrintStream save= new PrintStream(f);
+				String boardstring="";
+				for (int i=0; i<getGraphSize();i++) {
+					if (!getTokenStack(i+1).isEmpty() && getTokenStack(i+1).get(0).getColor()==Color.RED) boardstring=boardstring+"red"+",";
+					else if (!getTokenStack(i+1).isEmpty() && getTokenStack(i+1).get(0).getColor()==Color.BLUE) boardstring=boardstring+"blue"+",";
+					else boardstring=boardstring+"null"+",";
 				}
-				historystring = historystring.substring(0, historystring.length() - 1);
-				save.println(historystring);
-			}
-			save.close();
-		} catch (FileNotFoundException e) {// This block should not be reached
-											// unless an access error has
-											// occured
-			e.printStackTrace();
+				
+				boardstring=boardstring.substring(0,boardstring.length()-1);
+				
+				save.println(boardstring); // close the PrintStreams
+				if (activeplayer==Color.RED) save.println("red");
+				else save.println("blue");  
+				save.println(redstate);    // red state added
+				save.println(redcountoffboard);  //red count off board
+				save.println(bluestate); //blue state added
+				save.println(bluecountoffboard); //blue count off board
+				if (computermode){
+					if (computercolor==Color.RED) save.println("true,red"); //computermode and computer color
+					else save.println("true,blue");
+				}
+				else save.println("false,");
+				for (Color[] carray: history) {  //complete history of moves also added to end of file
+					String historystring="";
+					for (Color c: carray){
+						if (c==Color.RED) historystring=historystring+"red"+",";
+						else if (c==Color.BLUE) historystring=historystring+"blue"+",";
+						else historystring=historystring+"null"+",";
+					}
+					historystring=historystring.substring(0,historystring.length()-1);
+					save.println(historystring);
+				}
+				save.close();
+			} catch (FileNotFoundException e) {// This block should not be reached unless an access error has occured
+					e.printStackTrace();
+			} 
 		}
-	}
 
+
+
+
+
+
+	
 	/*
 	 * If continue from save game button is pressed, it reads from the save file
 	 * to place all the pieces back on the board as left before. Continues last
 	 * saved game.
 	 */
-	public void readFromSave(ArrayList<double[]> nodecoordinates, int pieceradius) throws FileNotFoundException {
-
-		Scanner input = new Scanner(new FileReader("save.txt"));
-		pieces = new ArrayList<Piece>();
-		history = new ArrayList<Color[]>();
+	public void readFromSave(ArrayList<double[]> nodecoordinates, int pieceradius) throws FileNotFoundException{
+		
+		InputStream in= this.getClass().getResourceAsStream("/save.txt");
+		Scanner input = new Scanner(in);
+		
+		pieces= new ArrayList<Piece>();
+		history =new ArrayList<Color[]>();
 		for (int i = 0; i < getGraphSize(); i++) {
-			removeBoardPiece(i + 1); //initialize empty board
+			removeBoardPiece(i + 1);
 		}
-		redcountonboard = 0;
-		bluecountonboard = 0;
-		int line = 0;
-		while (input.hasNextLine()) {
-			System.out.println(line);
-			if (line == 0) {
-				String fileboardstring = input.nextLine();
-				String[] fileboardarray = fileboardstring.split(",");
-				for (int i = 0; i < fileboardarray.length; i++) {
+		redcountonboard=0;
+		bluecountonboard=0;
+		int line=0;
+		while (input.hasNextLine()){
+			
+			if (line==0){
+				String fileboardstring=input.nextLine();
+				String [] fileboardarray = fileboardstring.split(",");
+				for (int i=0;i<fileboardarray.length;i++){
 					if (fileboardarray[i].equals("red")) {
-						addToken(new Piece(Color.RED, nodecoordinates.get(i)[0] - pieceradius / 2,
-								nodecoordinates.get(i)[1] - pieceradius / 2, pieceradius), i + 1);
+						addToken(new Piece(Color.RED, nodecoordinates.get(i)[0]-pieceradius/2 , nodecoordinates.get(i)[1]-pieceradius/2 , pieceradius), i+1); //add pieces back to board
 						redcountonboard++;
-					} else if (fileboardarray[i].equals("blue")) {
-						System.out.println(i);
-						addToken(new Piece(Color.BLUE, nodecoordinates.get(i)[0] - pieceradius / 2,
-								nodecoordinates.get(i)[1] - pieceradius / 2, pieceradius), i + 1);
-						bluecountonboard++;
+		
 					}
-
+					else if (fileboardarray[i].equals("blue")){
+						
+						addToken(new Piece(Color.BLUE, nodecoordinates.get(i)[0]-pieceradius/2 , nodecoordinates.get(i)[1]-pieceradius/2  , pieceradius), i+1); //pieces back to board
+						bluecountonboard++;
+				
+					}
+					
 				}
 				line++;
-			} else if (line == 1) { // Read for last active player from save
-				String fileactiveplayer = input.nextLine();
-				if (fileactiveplayer.equals("red"))
-					activeplayer = Color.RED;
-				else
-					activeplayer = Color.BLUE;
-				line++;
-			} else if (line == 2) { // Read for red's last state in game
-				redstate = input.nextLine();
-				line++;
-			} else if (line == 3) { // Read for red stack left over
-				redcountoffboard = Integer.parseInt(input.nextLine());
+			}
+			else if (line==1){  //active player
+				String fileactiveplayer=input.nextLine();
+				if (fileactiveplayer.equals("red")) activeplayer=Color.RED;
+				else activeplayer=Color.BLUE;
 				line++;
 			}
-
-			else if (line == 4) { // read for blue's last state in game
-				bluestate = input.nextLine();
+			else if (line==2){  //red state
+				redstate=input.nextLine();
 				line++;
-			} else if (line == 5) { // read for blue stack left over
-				bluecountoffboard = Integer.parseInt(input.nextLine());
-				;
-				line++;
-			} else { //read for last placement of all pieces on board
-				String filehistorystring = input.nextLine();
-				String[] filehistoryarray = filehistorystring.split(",");
-				Color[] historyarray = new Color[filehistoryarray.length];
 
-				for (int i = 0; i < filehistoryarray.length; i++) {
+			}
+			else if (line==3){ //red off-board count
+				redcountoffboard=Integer.parseInt(input.nextLine());
+				line++;
+			}
+			
+			else if (line==4){ //blue state
+				bluestate=input.nextLine();
+				line++;
+
+			}
+			else if (line==5){ //blue off-board count
+				bluecountoffboard=Integer.parseInt(input.nextLine());;
+				line++;
+
+			}
+			else if (line==6){  //computermode and computer color
+				String computerinfo=input.nextLine();
+				String [] computerinfoarray = computerinfo.split(",");
+				if (computerinfoarray[0].equals("true")){
+					computermode=true;
+					if (computerinfoarray[1].equals("red")) computercolor=Color.RED;
+					else computercolor=Color.BLUE;
+				}
+				
+				else computermode=false;
+				line++;
+
+			}
+			else{
+				String filehistorystring=input.nextLine();  //complete move history
+				String [] filehistoryarray = filehistorystring.split(",");
+				Color[] historyarray=new Color[filehistoryarray.length];
+			
+				for (int i=0;i<filehistoryarray.length;i++){
 					if (filehistoryarray[i].equals("red")) {
-						historyarray[i] = Color.RED;
-					} else if (filehistoryarray[i].equals("blue")) {
-						historyarray[i] = Color.BLUE;
-					} else
-						historyarray[i] = null;
+						historyarray[i]=Color.RED;
+					}
+					else if (filehistoryarray[i].equals("blue")){
+						historyarray[i]=Color.BLUE;
+					}
+					else historyarray[i]=null;
 				}
 				history.add(historyarray);
 			}
 		}
 		input.close();// close the scanner at the end
 	}
+
+	
+
+	
+	/*
+	 * This function uses a Monte Carlo Tree Search algorithm to find the best move for the computer to make. 
+	 */
+	public int[] getComputerMove(){
+		
+
+		rootNode=new TreeNode(new GameState(true)); //make the root node
+			
+		for (int i=0;i<MCTS_ITERATIONS;i++){ //repeat algorithm for the desired number of iterations
+			TreeNode node=rootNode; //copy the root
+			GameState state=node.state.Clone(); //clone the state of the root
+			
+			
+			//**SELECT**
+			while (node.untriedMoves.isEmpty() && !node.childNodes.isEmpty()){ //node is fully expanded and non-terminal
+				node=node.UCTselectChild();
+				state.doMove(node.move);
+			}
+			//**EXPAND**
+			if (!node.untriedMoves.isEmpty()){ // if we can expand (i.e. state/node is non-terminal)
+				int rnd=new Random().nextInt(node.untriedMoves.size());
+				int[] randselection= node.untriedMoves.get(rnd);
+				state.doMove(randselection);
+				node=node.addChild(randselection, state); //add child and descend tree
+			}
+			//**ROLLOUT
+			while (!state.getMoves().isEmpty()){ //while state is non-terminal
+				ArrayList<int[]> allmoves=state.getMoves();
+				int rnd2=new Random().nextInt(allmoves.size());
+				int[] randselection2= allmoves.get(rnd2);
+				state.doMove(randselection2);
+			}
+			//**BACKPROPAGATE
+			while (node!=null){ //backpropagate from the expanded node and work back to the root node
+				node.Update(state.getResult(node.playerMoved)); // state is terminal. Update node with result from POV of node.playerJustMoved
+				node=node.parentNode;
+			}
+		}
+
+		Collections.sort(rootNode.childNodes, (c1,c2) -> c1.wins.compareTo(c2.wins));  //sort nodes by number of visits
+		int[] move=new int[3];
+		for (int i=0;i<3;i++){
+			move[i]=rootNode.childNodes.get(rootNode.childNodes.size()-1).move[i]+1; //construct move array from node with the most number of visits
+		}
+	
+		return move;
+		
+		
+		
+	}
+	
+	
+	
+
+	
+	/*
+	 * A state of the game used in the AI, i.e. the game board.
+        By convention the players are numbered 1 and 2. 
+	 */
+	public class GameState {
+		int playerMoved; //last player to move
+		int[] board;  //board array
+		int[][] piecenumbers=new int[3][2];  //array to store the number of off and on-board pieces
+		ArrayList<int[]> history2=new ArrayList<int[]>();  //array to store history
+		
+		
+		//initialize all state values to the current state of the game
+		public GameState(boolean first){
+			this.board=new int[getGraphSize()];
+			for (int i = 0; i < getGraphSize(); i++) {
+				if (getTokenStack(i + 1).isEmpty())
+					this.board[i] = 0;
+				else if (getTokenStack(i + 1).get(0).getColor() == getComputerColor())
+					this.board[i] = 1;
+				else
+					this.board[i] = 2;   
+			}
+			if (getComputerColor()==Color.RED){
+				this.piecenumbers[1][0]=redcountoffboard;
+				this.piecenumbers[1][1]=redcountonboard;
+				this.piecenumbers[2][0]=bluecountoffboard;
+				this.piecenumbers[2][1]=bluecountonboard;
+			}
+			else{
+				this.piecenumbers[1][0]=bluecountoffboard;
+				this.piecenumbers[1][1]=bluecountonboard;
+				this.piecenumbers[2][0]=redcountoffboard;
+				this.piecenumbers[2][1]=redcountonboard;
+			}
+			
+			for (Color[] c : history) {
+				int[] historyboard = new int[getGraphSize()];
+				for (int i = 0; i < getGraphSize(); i++) {
+					if (c[i] == null)
+						historyboard[i] = 0;
+					else if (c[i] == getComputerColor())
+						historyboard[i] = 1;
+					else
+						historyboard[i] = 2;
+				}
+				this.history2.add(historyboard);
+			}
+			this.playerMoved=2; //At the root pretend the player just moved is player 2 - player 1 has the first move
+		}
+		
+		
+		
+		public GameState(){
+		}
+		
+		/*
+		 * Clone this current state and return the clone.
+		 */
+		public GameState Clone(){
+			GameState state=new GameState();
+			
+			int[] boardclone=this.board.clone();
+			int [][] piecenumbersclone = new int[3][2];
+			for(int i = 0; i < this.piecenumbers.length; i++)
+				piecenumbersclone[i] = this.piecenumbers[i].clone();
+			ArrayList<int[]> historyclone=new ArrayList<int[]>();
+			for (int[] i: this.history2){
+				historyclone.add(i);
+			}
+			
+			state.playerMoved=this.playerMoved;
+			state.board=boardclone;
+			state.history2=historyclone;
+			state.piecenumbers=piecenumbersclone;
+			
+			return state; //return the cloned state
+		}
+		
+		/*
+		 * Update a state by carrying out the given move.
+            Must update playerJustMoved.
+		 */
+		public void doMove(int[] move){
+			this.playerMoved = (3-this.playerMoved);
+			if (move[0]==-1){ //off board piece picked up
+				this.piecenumbers[this.playerMoved][0]-=1;
+				this.piecenumbers[this.playerMoved][1]+=1;
+				this.history2=new ArrayList<int[]>(); //erase history
+			}
+			else{
+				this.board[move[0]]=0; //on board piece picked up
+				history2.add(this.board);
+			}
+			
+			this.board[move[1]]=this.playerMoved; //piece placed
+			if (move[2]!=-1){ //piece can be removed
+				this.board[move[2]]=0; //piece is removed
+				this.piecenumbers[3-this.playerMoved][1]-=1;  //on board piece numbers go down
+				this.history2=new ArrayList<int[]>(); //erase history
+			}
+		}
+		
+		/*
+		 * Get all possible moves from this state. 
+		 */
+		public ArrayList<int[]> getMoves(){
+			return getMoves(false);
+		}
+		
+		/*
+		 * Get all possible moves from this state. if checkwin is true, you are using this function to check for a win. 
+		 */
+		public ArrayList<int[]> getMoves(boolean checkwin){
+			ArrayList<int[]> allmoves=new ArrayList<int[]>();
+			
+			if (!checkwin){
+				if ((this.piecenumbers[3-this.playerMoved][0]==0) && (this.piecenumbers[3-this.playerMoved][1]<3)){
+					return allmoves;
+				}
+			}
+			
+			if (this.piecenumbers[3-this.playerMoved][0]>0){
+				for (int i=0;i<this.board.length;i++){
+					if (this.board[i]==0){
+						if (this.makesMill(-1, i, (3-this.playerMoved))){
+							for (int m: this.canRemove()){
+								allmoves.add(new int[] {-1,i,m});
+							}
+						}
+						else allmoves.add(new int[] {-1,i,-1});
+					}
+				}
+			}
+			else{
+				for (int i=0;i<this.board.length;i++){
+					if (this.board[i]==(3-this.playerMoved)){
+						int[] neighbors = getNeighbors(i+1);
+						for (int n: neighbors){
+							if (this.board[n-1]==0){
+								if (this.makesMill(i, n-1, (3-this.playerMoved))){
+									for (int m: this.canRemove()){
+										allmoves.add(new int[] {i,n-1,m});
+									}
+								}
+								else{
+									allmoves.add(new int[] {i, n-1, -1});
+								}
+							}
+						}
+					}
+				}
+			}
+			return allmoves; //return all possible moves
+		}
+		
+		/*
+		 * Get the game result from the viewpoint of plater p.
+		 */
+		public double getResult(int p){
+			for (int[] i: this.history2){
+				if (Arrays.equals(i, this.board)){
+						return 0.1;
+				}
+			}
+			if (this.getMoves(true).isEmpty() && 3-this.playerMoved==p) return 0.0;
+			if (this.piecenumbers[p][1]<3) return 0.0;
+			if (this.getMoves(true).isEmpty() && 3-this.playerMoved!=p) return 1.0;
+			if (this.piecenumbers[3-p][1]<3) return 1.0;
+			
+			assert false;
+			return 0.0;
+		}
+	
+		/*
+		 * by removing a piece from old, and adding it to i, does player p make any mills?
+		 */
+		private boolean makesMill(int old, int i, int p){
+			if (old!=-1) this.board[old]=0;
+			if ((i==0 && ((this.board[1]==p && this.board[2]==p) || (this.board[6]==p && this.board[13]==p)))
+					|| (i==1 && ((this.board[0]==p && this.board[2]==p)))
+					|| (i==2 && ((this.board[0]==p && this.board[1]==p) || (this.board[9]==p && this.board[15]==p)))
+					|| (i==3 && ((this.board[4]==p && this.board[5]==p) || (this.board[7]==p && this.board[10]==p)))
+					|| (i==4 && ((this.board[3]==p && this.board[5]==p)))
+					|| (i==5 && ((this.board[3]==p && this.board[4]==p) || (this.board[8]==p && this.board[12]==p)))
+					|| (i==6 && ((this.board[0]==p && this.board[13]==p)))
+					|| (i==7 && ((this.board[3]==p && this.board[10]==p)))
+					|| (i==8 && ((this.board[5]==p && this.board[12]==p)))
+					|| (i==9 && ((this.board[2]==p && this.board[15]==p)))
+					|| (i==10 && ((this.board[3]==p && this.board[7]==p) || (this.board[11]==p && this.board[12]==p)))
+					|| (i==11 && ((this.board[10]==p && this.board[12]==p)))
+					|| (i==12 && ((this.board[5]==p && this.board[8]==p) || (this.board[10]==p && this.board[11]==p)))
+					|| (i==13 && ((this.board[0]==p && this.board[6]==p) || (this.board[14]==p && this.board[15]==p)))
+					|| (i==14 && ((this.board[13]==p && this.board[15]==p)))
+					|| (i==15 && ((this.board[2]==p && this.board[9]==p) || (this.board[13]==p && this.board[14]==p)))){
+						if (old!=-1) this.board[old]=p;
+						return true;
+					}
+					else{
+						if (old!=-1) this.board[old]=p;
+						return false;
+					}
+		}
+		/*
+		 * return the index of all the pieces that the given player, who formed a mill, can remove
+		 */
+		private ArrayList<Integer> canRemove(){
+			ArrayList<Integer> pieces= new ArrayList<Integer>();
+			for (int i=0; i<this.board.length;i++){
+				if (this.board[i]==this.playerMoved && !makesMill(-1, i, this.playerMoved)){
+					pieces.add(i);
+				}
+			}
+			if (pieces.isEmpty()){
+				for (int i=0; i<this.board.length;i++){
+					if (this.board[i]==this.playerMoved){
+						pieces.add(i);
+					}
+				}
+			}
+			return pieces;
+		}
+	}
+
+	
+	
+	
+	
 
 }
