@@ -47,15 +47,22 @@ public class GameController implements MouseListener, ActionListener {
 		}
 		else if (command == "Continue from Save") { //continue from save pressed (main menu)
 			try{
+				String gameMode = model.readLineFromFile("save.txt",0);
+				if (gameMode.equals("six") || gameMode.equals("nine") || gameMode.equals("twelve")) {
+					model.setGraph(gameMode);
+				}
+				view.setNodeCoordinates();
 				model.readFromSave(view.NodeCoordinates, view.PIECERADIUS); //read from save
-				view.viewReset(); //reset view variables to start-of-game state
+				view.viewReset();
 				view.initGameWindow(false); //initialize game window (false-- no mode selection)
 			}
 
-			catch (FileNotFoundException e){  
+			catch (FileNotFoundException e){
+				e.printStackTrace();
 				view.notification("Error: No save file available!");	
 			}
 			catch(NullPointerException e){
+				e.printStackTrace();
 				view.notification("Error: Unable to load save file!");
 			}
 			
@@ -63,6 +70,7 @@ public class GameController implements MouseListener, ActionListener {
 
 		else if (command == "Six Men's Morris"){
 			model.setGraph("six");
+			view.setNodeCoordinates();
 			model.modelInit();
 			view.viewInit();
 			view.initGameWindow(true); // calls view to create Set Pieces window
@@ -70,6 +78,7 @@ public class GameController implements MouseListener, ActionListener {
 
 		else if (command == "Nine Men's Morris"){
 			model.setGraph("nine");
+			view.setNodeCoordinates();
 			model.modelInit();
 			view.viewInit();
 			view.initGameWindow(true); // calls view to create Set Pieces window
@@ -77,6 +86,7 @@ public class GameController implements MouseListener, ActionListener {
 
 		else if (command == "Twelve Men's Morris"){
 			model.setGraph("twelve");
+			view.setNodeCoordinates();
 			model.modelInit();
 			view.viewInit();
 			view.initGameWindow(true); // calls view to create Set Pieces window
@@ -95,9 +105,8 @@ public class GameController implements MouseListener, ActionListener {
 		}
 
 		else if (command=="Return to Main Menu"){
-			view.closeGame(); //close game window/ game over frame
+			view.closeGame(); //close game window / game over frame
 			model.modelReset(); //reset model variables to start-of-game state
-			view.viewReset(); //reset view variables to start-of-game state
 			view.initMenu();//open up the main menu
 			
 			

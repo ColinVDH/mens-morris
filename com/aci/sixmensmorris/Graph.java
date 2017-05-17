@@ -89,24 +89,26 @@ public class Graph {
 
 
 	public Graph(String mode) {
-		if (mode=="six"){
+		if (mode.equals("six")){
 			setup(SIXSETUP);
 			PIECENUMBER=6;
 			NAME="Six Men's Morris";
 			MODE="six";
 		}
-		else if (mode=="nine"){
+		else if (mode.equals("nine")){
 			setup(NINESETUP);
 			PIECENUMBER=9;
 			NAME="Nine Men's Morris";
 			MODE="nine";
 		}
-		else if (mode=="twelve"){
+		else if (mode.equals("twelve")){
 			setup(TWELVESETUP);
 			PIECENUMBER=12;
 			NAME="Twelve Men's Morris";
 			MODE="twelve";
 		}
+
+		else throw new IllegalArgumentException("Invalid game mode!");
 	}
 
 	public void setup(double[][][] SETUP) {

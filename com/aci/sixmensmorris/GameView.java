@@ -48,14 +48,15 @@ public class GameView {
     private static JLabel loadingmessage= new JLabel("Thinking... ");
     
 	public GameView(GameModel model) {
-
 		this.model = model;
+	}
 
+	public void setNodeCoordinates(){
+		NodeCoordinates = new ArrayList<double[]>();
+		getNodeCoordinates(NODE1_X, NODE1_Y);
 	}
 
 	public void viewInit(){
-		getNodeCoordinates(NODE1_X, NODE1_Y);
-
 		for (int i = 0; i < model.graph.getPieceNumber(); i++) {
 			//			 Piece redpiece = new Piece(Color.RED, (double) GAMEWIDTH / 2 +
 			//			 PIECERADIUS * (i - (double) model.graph.getPieceNumber()/2), 85,
@@ -380,7 +381,7 @@ public class GameView {
 			savebutton.setEnabled(false);
 			frame3 = new JFrame("");
 			frame3.setResizable(false);
-			frame3.setSize(300, 150);
+			frame3.setSize(500, 150);
 			frame3.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 			
 

@@ -8,15 +8,9 @@ package com.aci.sixmensmorris;
 import java.awt.Color;
 
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.FileReader;
-import java.io.InputStreamReader;
-import java.io.PrintStream;
+import java.io.*;
 import java.util.*;
 import java.util.prefs.Preferences;
-import java.io.InputStream;
 
 
 public class GameModel {
@@ -37,7 +31,7 @@ public class GameModel {
 	private static Color computercolor;
 	private int MCTS_ITERATIONS=10000;
 	private static String mode;
-	static String s="/com/aci/sixmensmorris";
+//	static String s="~/JavaProjects/six-mens-morris/";
 
 
 
@@ -77,12 +71,7 @@ public class GameModel {
 		redstate = "place";
 		bluestate = "place";
 		redcountonboard = 0;
-		redcountoffboard= graph.getPieceNumber();
 		bluecountonboard = 0;
-		bluecountoffboard = graph.getPieceNumber();
-		for (int i = 0; i < graph.getGraphSize(); i++) {
-			removeBoardPiece(i + 1);
-		}
 
 		pieces= new ArrayList<Piece>();
 		history =new ArrayList<Color[]>();
@@ -319,8 +308,10 @@ public class GameModel {
 				if ((activeplayer == Color.RED && bluecountonboard <= 2 && bluecountoffboard==0)
 					|| (activeplayer == Color.BLUE && redcountonboard <= 2 && redcountoffboard==0))
 					newstate = "win";
-				 if (activeplayer==Color.RED && bluecountonboard==3 && !graph.MODE.equals("six")) bluestate="fly";
-				 if (activeplayer==Color.BLUE && redcountonboard==3 && !graph.MODE.equals("six")) redstate="fly";
+				 if (activeplayer==Color.RED && bluecountonboard==3
+						 && bluecountoffboard==0 &&  !graph.MODE.equals("six")) bluestate="fly";
+				 if (activeplayer==Color.BLUE && redcountonboard==3
+						 && redcountoffboard==0 &&  !graph.MODE.equals("six")) redstate="fly";
 			}
 		}
 
@@ -460,18 +451,20 @@ public class GameModel {
 		public void writeToSave() {
 			try {
 				// opens a PrintStream for each of the files
-			
-				FileOutputStream f= new FileOutputStream(Main.class.getResource("/save.txt").getFile());
+				File saveFile = new File("save.txt");
+				System.out.println(saveFile.getAbsolutePath());
+				FileOutputStream f= new FileOutputStream(saveFile);
 				PrintStream save= new PrintStream(f);
+				save.println(graph.MODE);
+
 				String boardstring="";
 				for (int i=0; i<graph.getGraphSize();i++) {
 					if (!graph.getTokenStack(i+1).isEmpty() && graph.getTokenStack(i+1).get(0).getColor()==Color.RED) boardstring=boardstring+"red"+",";
 					else if (!graph.getTokenStack(i+1).isEmpty() && graph.getTokenStack(i+1).get(0).getColor()==Color.BLUE) boardstring=boardstring+"blue"+",";
 					else boardstring=boardstring+"null"+",";
 				}
-				
+
 				boardstring=boardstring.substring(0,boardstring.length()-1);
-				
 				save.println(boardstring); // close the PrintStreams
 				if (activeplayer==Color.RED) save.println("red");
 				else save.println("blue");  
@@ -484,6 +477,7 @@ public class GameModel {
 					else save.println("true,blue");
 				}
 				else save.println("false,");
+
 				for (Color[] carray: history) {  //complete history of moves also added to end of file
 					String historystring="";
 					for (Color c: carray){
@@ -495,7 +489,7 @@ public class GameModel {
 					save.println(historystring);
 				}
 				save.close();
-			} catch (FileNotFoundException e) {// This block should not be reached unless an access error has occured
+			} catch (Exception e) {// This block should not be reached unless an access error has occured
 					e.printStackTrace();
 			} 
 		}
@@ -504,7 +498,22 @@ public class GameModel {
 
 
 
-
+	public String readLineFromFile(String filename, int line) throws FileNotFoundException{
+		File saveFile = new File(filename);
+		System.out.println(saveFile.getAbsolutePath());
+		InputStream in = new FileInputStream(saveFile);
+		Scanner input = new Scanner(in);
+		int i = -1;
+		String retval = "";
+		while (i<line){
+			if (input.hasNext()) {
+				retval = input.nextLine();
+				i++;
+			}
+			else return retval;
+		}
+		return retval;
+	}
 	
 	/*
 	 * If continue from save game button is pressed, it reads from the save file
@@ -512,65 +521,68 @@ public class GameModel {
 	 * saved game.
 	 */
 	public void readFromSave(ArrayList<double[]> nodecoordinates, int pieceradius) throws FileNotFoundException{
-		InputStream in= this.getClass().getResourceAsStream("/save.txt");
+		File saveFile = new File("save.txt");
+		System.out.println(saveFile.getAbsolutePath());
+		InputStream in = new FileInputStream(saveFile);
 		Scanner input = new Scanner(in);
-		
+
 		pieces= new ArrayList<Piece>();
 		history =new ArrayList<Color[]>();
-		for (int i = 0; i < graph.getGraphSize(); i++) {
-			removeBoardPiece(i + 1);
+		if (graph!=null){
+			for (int i = 0; i < graph.getGraphSize(); i++)
+				removeBoardPiece(i + 1);
 		}
 		redcountonboard=0;
 		bluecountonboard=0;
 		int line=0;
 		while (input.hasNextLine()){
-			
-			if (line==0){
+			if (line == 0){
+				input.nextLine();
+				line++;
+			}
+			if (line==1){
 				String fileboardstring=input.nextLine();
 				String [] fileboardarray = fileboardstring.split(",");
 				for (int i=0;i<fileboardarray.length;i++){
 					if (fileboardarray[i].equals("red")) {
 						graph.addToken(new Piece(Color.RED, nodecoordinates.get(i)[0]-pieceradius/2 , nodecoordinates.get(i)[1]-pieceradius/2 , pieceradius), i+1); //add pieces back to board
 						redcountonboard++;
-		
 					}
 					else if (fileboardarray[i].equals("blue")){
-						
 						graph.addToken(new Piece(Color.BLUE, nodecoordinates.get(i)[0]-pieceradius/2 , nodecoordinates.get(i)[1]-pieceradius/2  , pieceradius), i+1); //pieces back to board
 						bluecountonboard++;
-				
 					}
 					
 				}
 				line++;
 			}
-			else if (line==1){  //active player
+			else if (line==2){ //active player
 				String fileactiveplayer=input.nextLine();
 				if (fileactiveplayer.equals("red")) activeplayer=Color.RED;
 				else activeplayer=Color.BLUE;
 				line++;
 			}
-			else if (line==2){  //red state
+			else if (line==3){  //red state
 				redstate=input.nextLine();
 				line++;
 
 			}
-			else if (line==3){ //red off-board count
+			else if (line==4){ //red off-board count
 				redcountoffboard=Integer.parseInt(input.nextLine());
 				line++;
 			}
 			
-			else if (line==4){ //blue state
+			else if (line==5){ //blue state
 				bluestate=input.nextLine();
 				line++;
 
 			}
-			else if (line==5){ //blue off-board count
+			else if (line==6){ //blue off-board count
 				bluecountoffboard=Integer.parseInt(input.nextLine());;
 				line++;
 
 			}
-			else if (line==6){  //computermode and computer color
+			else if (line==7){  //computermode and computer color
 				String computerinfo=input.nextLine();
 				String [] computerinfoarray = computerinfo.split(",");
 				if (computerinfoarray[0].equals("true")){
@@ -578,16 +590,9 @@ public class GameModel {
 					if (computerinfoarray[1].equals("red")) computercolor=Color.RED;
 					else computercolor=Color.BLUE;
 				}
-				
 				else computermode=false;
 				line++;
 
-			}
-			else if (line==7){ //gamemode (six, nine, twelve)
-				String gameMode = input.nextLine();
-				if (gameMode.equals("six") || gameMode.equals("nine") || gameMode.equals("twelve"))
-					setGraph(gameMode);
-				line++;
 			}
 			else{
 				String filehistorystring=input.nextLine();  //complete move history
@@ -842,31 +847,162 @@ public class GameModel {
 		 * by removing a piece from old, and adding it to i, does player p make any mills?
 		 */
 		private boolean makesMill(int old, int i, int p){
-			if (old!=-1) this.board[old]=0;
-			if ((i==0 && ((this.board[1]==p && this.board[2]==p) || (this.board[6]==p && this.board[13]==p)))
-					|| (i==1 && ((this.board[0]==p && this.board[2]==p)))
-					|| (i==2 && ((this.board[0]==p && this.board[1]==p) || (this.board[9]==p && this.board[15]==p)))
-					|| (i==3 && ((this.board[4]==p && this.board[5]==p) || (this.board[7]==p && this.board[10]==p)))
-					|| (i==4 && ((this.board[3]==p && this.board[5]==p)))
-					|| (i==5 && ((this.board[3]==p && this.board[4]==p) || (this.board[8]==p && this.board[12]==p)))
-					|| (i==6 && ((this.board[0]==p && this.board[13]==p)))
-					|| (i==7 && ((this.board[3]==p && this.board[10]==p)))
-					|| (i==8 && ((this.board[5]==p && this.board[12]==p)))
-					|| (i==9 && ((this.board[2]==p && this.board[15]==p)))
-					|| (i==10 && ((this.board[3]==p && this.board[7]==p) || (this.board[11]==p && this.board[12]==p)))
-					|| (i==11 && ((this.board[10]==p && this.board[12]==p)))
-					|| (i==12 && ((this.board[5]==p && this.board[8]==p) || (this.board[10]==p && this.board[11]==p)))
-					|| (i==13 && ((this.board[0]==p && this.board[6]==p) || (this.board[14]==p && this.board[15]==p)))
-					|| (i==14 && ((this.board[13]==p && this.board[15]==p)))
-					|| (i==15 && ((this.board[2]==p && this.board[9]==p) || (this.board[13]==p && this.board[14]==p)))){
-						if (old!=-1) this.board[old]=p;
-						return true;
-					}
-					else{
-						if (old!=-1) this.board[old]=p;
-						return false;
-					}
+			if (graph.MODE.equals("six")) {
+				if (old != -1) this.board[old] = 0;
+				if ((i == 0 && ((this.board[1] == p && this.board[2] == p) || (this.board[6] == p && this.board[13] == p)))
+						|| (i == 1 && ((this.board[0] == p && this.board[2] == p)))
+						|| (i == 2 && ((this.board[0] == p && this.board[1] == p) || (this.board[9] == p && this.board[15] == p)))
+						|| (i == 3 && ((this.board[4] == p && this.board[5] == p) || (this.board[7] == p && this.board[10] == p)))
+						|| (i == 4 && ((this.board[3] == p && this.board[5] == p)))
+						|| (i == 5 && ((this.board[3] == p && this.board[4] == p) || (this.board[8] == p && this.board[12] == p)))
+						|| (i == 6 && ((this.board[0] == p && this.board[13] == p)))
+						|| (i == 7 && ((this.board[3] == p && this.board[10] == p)))
+						|| (i == 8 && ((this.board[5] == p && this.board[12] == p)))
+						|| (i == 9 && ((this.board[2] == p && this.board[15] == p)))
+						|| (i == 10 && ((this.board[3] == p && this.board[7] == p) || (this.board[11] == p && this.board[12] == p)))
+						|| (i == 11 && ((this.board[10] == p && this.board[12] == p)))
+						|| (i == 12 && ((this.board[5] == p && this.board[8] == p) || (this.board[10] == p && this.board[11] == p)))
+						|| (i == 13 && ((this.board[0] == p && this.board[6] == p) || (this.board[14] == p && this.board[15] == p)))
+						|| (i == 14 && ((this.board[13] == p && this.board[15] == p)))
+						|| (i == 15 && ((this.board[2] == p && this.board[9] == p) || (this.board[13] == p && this.board[14] == p)))) {
+					if (old != -1) this.board[old] = p;
+					return true;
+				} else {
+					if (old != -1) this.board[old] = p;
+					return false;
+				}
+			}
+
+			if (graph.MODE.equals("nine")) {
+				if (old != -1) this.board[old] = 0;
+				if ((i == 0 && ((this.board[1] == p && this.board[2] == p)
+							|| (this.board[9] == p && this.board[21] == p)))
+						|| (i == 1 && ((this.board[0] == p && this.board[2] == p)
+							|| (this.board[4] == p && this.board[7] == p)))
+						|| (i == 2 && ((this.board[0] == p && this.board[1] == p)
+							|| (this.board[14] == p && this.board[23] == p)))
+						|| (i == 3 && ((this.board[4] == p && this.board[5] == p)
+							|| (this.board[10] == p && this.board[18] == p)))
+						|| (i == 4 && ((this.board[1] == p && this.board[7] == p)
+							|| (this.board[3] == p && this.board[5] == p)))
+						|| (i == 5 && ((this.board[3] == p && this.board[4] == p)
+							|| (this.board[13] == p && this.board[20] == p)))
+						|| (i == 6 && ((this.board[7] == p && this.board[8] == p)
+							|| (this.board[11] == p && this.board[15] == p)))
+						|| (i == 7 && ((this.board[1] == p && this.board[4] == p)
+							|| (this.board[6] == p && this.board[8] == p)))
+						|| (i == 8 && ((this.board[6] == p && this.board[7] == p)
+							|| (this.board[12] == p && this.board[17] == p)))
+						|| (i == 9 && ((this.board[0] == p && this.board[21] == p)
+							|| (this.board[10] == p && this.board[11] == p)))
+						|| (i == 10 && ((this.board[3] == p && this.board[18] == p)
+							|| (this.board[9] == p && this.board[11] == p)))
+						|| (i == 11 && ((this.board[6] == p && this.board[15] == p)
+							|| (this.board[9] == p && this.board[10] == p)))
+						|| (i == 12 && ((this.board[8] == p && this.board[17] == p)
+							|| (this.board[13] == p && this.board[14] == p)))
+						|| (i == 13 && ((this.board[5] == p && this.board[20] == p)
+							|| (this.board[12] == p && this.board[14] == p)))
+						|| (i == 14 && ((this.board[2] == p && this.board[23] == p)
+							|| (this.board[12] == p && this.board[13] == p)))
+						|| (i == 15 && ((this.board[6] == p && this.board[11] == p)
+							|| (this.board[16] == p && this.board[17] == p)))
+						|| (i == 16 && ((this.board[15] == p && this.board[17] == p)
+							|| (this.board[19] == p && this.board[22] == p)))
+						|| (i == 17 && ((this.board[8] == p && this.board[12] == p)
+							|| (this.board[15] == p && this.board[16] == p)))
+						|| (i == 18 && ((this.board[3] == p && this.board[10] == p)
+							|| (this.board[19] == p && this.board[20] == p)))
+						|| (i == 19 && ((this.board[16] == p && this.board[22] == p)
+							|| (this.board[18] == p && this.board[20] == p)))
+						|| (i == 20 && ((this.board[5] == p && this.board[13] == p)
+							|| (this.board[18] == p && this.board[19] == p)))
+						|| (i == 21 && ((this.board[0] == p && this.board[9] == p)
+							|| (this.board[22] == p && this.board[23] == p)))
+						|| (i == 22 && ((this.board[16] == p && this.board[19] == p)
+							|| (this.board[21] == p && this.board[23] == p)))
+						|| (i == 23 && ((this.board[2] == p && this.board[14] == p)
+							|| (this.board[21] == p && this.board[22] == p)))) {
+					if (old != -1) this.board[old] = p;
+					return true;
+				} else {
+					if (old != -1) this.board[old] = p;
+					return false;
+				}
+			}
+
+			else { //twelve
+				if (old != -1) this.board[old] = 0;
+				if ((i == 0 && ((this.board[1] == p && this.board[2] == p)
+						|| (this.board[3] == p && this.board[6] == p)
+						|| (this.board[9] == p && this.board[21] == p)))
+						|| (i == 1 && ((this.board[0] == p && this.board[2] == p)
+						|| (this.board[4] == p && this.board[7] == p)))
+						|| (i == 2 && ((this.board[0] == p && this.board[1] == p)
+						|| (this.board[5] == p && this.board[8] == p)
+						|| (this.board[14] == p && this.board[23] == p)))
+						|| (i == 3 && ((this.board[0] == p && this.board[6] == p)
+						|| (this.board[4] == p && this.board[5] == p)
+						|| (this.board[10] == p && this.board[18] == p)))
+						|| (i == 4 && ((this.board[1] == p && this.board[7] == p)
+						|| (this.board[3] == p && this.board[5] == p)))
+						|| (i == 5 && ((this.board[2] == p && this.board[8] == p)
+						|| (this.board[3] == p && this.board[4] == p)
+						|| (this.board[13] == p && this.board[20] == p)))
+						|| (i == 6 && ((this.board[0] == p && this.board[3] == p)
+						|| (this.board[7] == p && this.board[8] == p)
+						|| (this.board[11] == p && this.board[15] == p)))
+						|| (i == 7 && ((this.board[1] == p && this.board[4] == p)
+						|| (this.board[6] == p && this.board[8] == p)))
+						|| (i == 8 && ((this.board[2] == p && this.board[5] == p)
+						|| (this.board[6] == p && this.board[7] == p)
+						|| (this.board[12] == p && this.board[17] == p)))
+						|| (i == 9 && ((this.board[0] == p && this.board[21] == p)
+						|| (this.board[10] == p && this.board[11] == p)))
+						|| (i == 10 && ((this.board[3] == p && this.board[18] == p)
+						|| (this.board[9] == p && this.board[11] == p)))
+						|| (i == 11 && ((this.board[6] == p && this.board[15] == p)
+						|| (this.board[9] == p && this.board[10] == p)))
+						|| (i == 12 && ((this.board[8] == p && this.board[17] == p)
+						|| (this.board[13] == p && this.board[14] == p)))
+						|| (i == 13 && ((this.board[5] == p && this.board[20] == p)
+						|| (this.board[12] == p && this.board[14] == p)))
+						|| (i == 14 && ((this.board[2] == p && this.board[23] == p)
+						|| (this.board[12] == p && this.board[13] == p)))
+						|| (i == 15 && ((this.board[6] == p && this.board[11] == p)
+						|| (this.board[16] == p && this.board[17] == p)
+						|| (this.board[18] == p && this.board[21] == p)))
+						|| (i == 16 && ((this.board[15] == p && this.board[17] == p)
+						|| (this.board[19] == p && this.board[22] == p)))
+						|| (i == 17 && ((this.board[8] == p && this.board[12] == p)
+						|| (this.board[15] == p && this.board[16] == p)
+						|| (this.board[20] == p && this.board[23] == p)))
+						|| (i == 18 && ((this.board[3] == p && this.board[10] == p)
+						|| (this.board[15] == p && this.board[21] == p)
+						|| (this.board[19] == p && this.board[20] == p)))
+						|| (i == 19 && ((this.board[16] == p && this.board[22] == p)
+						|| (this.board[18] == p && this.board[20] == p)))
+						|| (i == 20 && ((this.board[5] == p && this.board[13] == p)
+						|| (this.board[17] == p && this.board[23] == p)
+						|| (this.board[18] == p && this.board[19] == p)))
+						|| (i == 21 && ((this.board[0] == p && this.board[9] == p)
+						|| (this.board[15] == p && this.board[18] == p)
+						|| (this.board[22] == p && this.board[23] == p)))
+						|| (i == 22 && ((this.board[16] == p && this.board[19] == p)
+						|| (this.board[21] == p && this.board[23] == p)))
+						|| (i == 23 && ((this.board[2] == p && this.board[14] == p)
+						|| (this.board[17] == p && this.board[20] == p)
+						|| (this.board[21] == p && this.board[22] == p)))) {
+
+					if (old != -1) this.board[old] = p;
+					return true;
+				} else {
+					if (old != -1) this.board[old] = p;
+					return false;
+				}
+			}
 		}
+
 		/*
 		 * return the index of all the pieces that the given player, who formed a mill, can remove
 		 */
