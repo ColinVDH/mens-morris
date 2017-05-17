@@ -13,7 +13,7 @@
 
 
 
-### Rules<a id="sec-1" name="sec-1"></a>
+## Rules<a id="sec-1" name="sec-1"></a>
 
 Men's Morris games are played on a grid of interconnected points. Each player is given pieces or "men" to place on the board. 
 To win the game, you must to reduce your opponent to two men, or block all of his legal moves. The game proceeds in two phases:
@@ -24,32 +24,32 @@ To win the game, you must to reduce your opponent to two men, or block all of hi
 In either phase, if you manage to form a "mill" of three men in a row, you may pick one enemy piece to remove. 
 You are not allowed to remove a piece that is part of a mill, unless there are no other options.
 
-## Game Modes
-# Six Men's Morris
+### Game Modes
+#### Six Men's Morris
 - Simplest variation
 - Each player is given 6 men at the beginning of the game
 - Played on a 16-point grid
 - Normal rules apply
   
-# Nine Men's Morris
+#### Nine Men's Morris
 - Most common variation.
 - Each player is given 9 men at the beginning of the game
 - Played on a 24-point grid
 - If a player is reduced to 3 or fewer men, they are now allowed to "fly". On their turn, they may move a man to any empty spot on the board, not only adjacent spots
 
-# Twelve Men's Morris
+#### Twelve Men's Morris
 - Popular in South Africa where it is referred to as "Morabaraba"
 - Each player is given 12 men at the beginning of the game
 - Played on a 24-point grid with extra connections
 - "Flying" is allowed, subject to the same rules as Nine Men's Morris
 
-### Features<a id="sec-2" name="sec-2"></a>
+## Features<a id="sec-2" name="sec-2"></a>
 
 - Three distinct game-modes: Six Men's Morris, Nine Men's Morris, Twelve Men's Morris
 - Player vs. Computer, Player vs. Player 
 - Save Game Progress to file.
 
-### Game Logic <a id="sec-3" name="sec-3"></a>
+## Game Logic <a id="sec-3" name="sec-3"></a>
 
 In Player vs. Computer mode, move decisions by the computer are made using a Monte Carlo Tree Search (MCTS) algorithm. 
 MCTS is a heuristic search algorithm that combines tree search and random simulations. 
